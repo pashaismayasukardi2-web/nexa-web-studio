@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "../context/AuthContext";
 
 export const metadata: Metadata = {
   title: "NexaMOS Web Studio | Visual Landing Page & Web Builder",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className="antialiased bg-slate-950 text-slate-100">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

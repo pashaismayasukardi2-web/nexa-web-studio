@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Laptop, 
   Tablet, 
@@ -9,10 +9,17 @@ import {
   Edit3, 
   Code, 
   Download, 
-  Sparkles,
-  Palette
+  Palette,
+  LogIn,
+  LogOut,
+  User,
+  ShieldCheck,
+  Building2,
+  ChevronDown,
+  Sparkles
 } from 'lucide-react';
 import { DeviceView, StudioTheme, TenantType } from '../../types/builder';
+import { useAuth } from '../../context/AuthContext';
 
 interface TopNavbarProps {
   device: DeviceView;
@@ -41,6 +48,21 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   onOpenCodeModal,
   onExportHtml,
 }) => {
+  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <header className="h-16 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md px-4 flex items-center justify-between z-30 sticky top-0">
       {/* Brand & Project Name */}
@@ -203,6 +225,79 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           <Download className="w-3.5 h-3.5" />
           <span>Ekspor Web</span>
         </button>
+
+        {/* Divider */}
+        <div className="h-5 w-px bg-slate-800 mx-1 hidden sm:block" />
+
+        {/* NexaMOS Identity Auth Widget */}
+        {isLoading ? (
+          <div className="w-24 h-8 bg-slate-900 border border-slate-800 rounded-lg animate-pulse" />
+        ) : !isAuthenticated ? (
+          <button
+            onClick={() => login()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-lg shadow-indigo-600/20 hover:brightness-110 transition active:scale-95"
+            title="Masuk dengan NexaMOS Single Sign-On"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Masuk NexaMOS</span>
+          </button>
+        ) : (
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center gap-2 p-1 pl-2 pr-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition text-xs text-left"
+            >
+              <div className="w-7 h-7 rounded-lg bg-linear-to-tr from-indigo-600 to-violet-600 flex items-center justify-center font-bold text-white text-xs shadow">
+                {user?.display_name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="hidden md:block">
+                <div className="text-white font-medium truncate max-w-28">
+                  {user?.display_name}
+                </div>
+                <div className="text-indigo-400 text-xs flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3" />
+                  <span>Nexa ID</span>
+                </div>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+
+            {/* Dropdown Menu */}
+            {isUserMenuOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-2xl p-2 shadow-2xl z-50">
+                <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 mb-2">
+                  <div className="font-semibold text-white text-xs truncate">
+                    {user?.display_name}
+                  </div>
+                  <div className="text-slate-400 text-xs truncate mt-0.5">
+                    {user?.email || 'Akun NexaMOS Terhubung'}
+                  </div>
+                  {user?.organizations && user.organizations.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-slate-800/60 flex items-center gap-1.5 text-xs text-slate-300">
+                      <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <span className="truncate">{user.organizations[0].name}</span>
+                    </div>
+                  )}
+                  <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+                    <Sparkles className="w-3 h-3 shrink-0" />
+                    <span>Web Studio: Aktif</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition text-left"
+                >
+                  <LogOut className="w-3.5 h-3.5 shrink-0" />
+                  <span>Keluar Akun (Logout)</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

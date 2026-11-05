@@ -1,0 +1,127 @@
+'use client';
+
+import React, { useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { handleCallback } from '../../../lib/auth';
+import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+export default function AuthCallbackPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  // Guard against React Strict Mode double-invocation — auth code is single-use!
+  const hasProcessed = useRef(false);
+
+  useEffect(() => {
+    // If already processed (React Strict Mode fires useEffect twice in dev), bail out immediately
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
+
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+
+    if (error) {
+      setStatus('error');
+      setErrorMessage(errorDescription || error || 'Autentikasi dibatalkan.');
+      return;
+    }
+
+    if (!code || !state) {
+      setStatus('error');
+      setErrorMessage('Parameter autentikasi tidak lengkap (missing code or state).');
+      return;
+    }
+
+    async function processAuth() {
+      try {
+        await handleCallback(code!, state!);
+        setStatus('success');
+        setTimeout(() => {
+          // Gunakan full page reload (bukan soft navigation) agar AuthContext
+          // me-mount ulang dan langsung membaca session baru dari localStorage.
+          window.location.href = '/';
+        }, 800);
+      } catch (err: any) {
+        console.error('[Auth Callback Error]', err);
+        setStatus('error');
+        setErrorMessage(err.message || 'Gagal memproses sesi login.');
+      }
+    }
+
+    processAuth();
+  }, [searchParams, router]);
+
+  return (
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-2xl p-8 shadow-2xl backdrop-blur-md text-center">
+        {/* Brand Header */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-indigo-600 via-violet-600 to-fuchsia-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/20">
+            N
+          </div>
+          <div className="text-left">
+            <div className="font-bold text-white text-lg tracking-tight">NexaMOS</div>
+            <div className="text-xs text-indigo-400 font-medium">Single Sign-On</div>
+          </div>
+        </div>
+
+        {/* State: Loading */}
+        {status === 'loading' && (
+          <div className="flex flex-col items-center gap-4 py-4">
+            <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+            <div>
+              <h2 className="text-white font-semibold text-base mb-1">
+                Menghubungkan Akun NexaMOS...
+              </h2>
+              <p className="text-slate-400 text-xs">
+                Sedang memverifikasi token dan hak akses Web Studio Anda.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* State: Success */}
+        {status === 'success' && (
+          <div className="flex flex-col items-center gap-4 py-4">
+            <CheckCircle2 className="w-12 h-12 text-emerald-400 animate-pulse" />
+            <div>
+              <h2 className="text-white font-semibold text-base mb-1">
+                Autentikasi Berhasil!
+              </h2>
+              <p className="text-emerald-400/90 text-xs">
+                Mengarahkan kembali ke dashboard Web Studio...
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* State: Error */}
+        {status === 'error' && (
+          <div className="flex flex-col items-center gap-4 py-2">
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-white font-semibold text-base mb-1">
+                Gagal Masuk
+              </h2>
+              <p className="text-rose-400 text-xs wrap-break-word">
+                {errorMessage}
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/')}
+              className="mt-4 px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/20"
+            >
+              Kembali ke Studio
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
