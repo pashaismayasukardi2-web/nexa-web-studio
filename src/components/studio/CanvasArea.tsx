@@ -83,6 +83,8 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   };
 
   const themeCls = getThemeClasses();
+  const isMobile = device === 'mobile';
+  const isTablet = device === 'tablet';
 
   // Width container per device
   const getDeviceWidthClass = () => {
@@ -114,6 +116,22 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
       <div
         className={`${getDeviceWidthClass()} bg-slate-950 transition-all duration-300 overflow-hidden min-h-full shrink-0 text-slate-100 relative shadow-2xl border border-slate-800/80`}
       >
+        {/* Mobile Device Top Status Bar Mockup */}
+        {isMobile && (
+          <div className="bg-slate-950 px-6 pt-3 pb-2 flex items-center justify-between text-xs text-slate-400 select-none border-b border-slate-900">
+            <span className="font-semibold text-slate-300">09:41</span>
+            <div className="w-16 h-3.5 bg-slate-900 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-slate-950 rounded-full border border-slate-800" />
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <span className="font-bold">5G</span>
+              <div className="w-5 h-2.5 border border-slate-500 rounded p-0.5 flex items-center">
+                <div className="w-full h-full bg-slate-300 rounded-xs" />
+              </div>
+            </div>
+          </div>
+        )}
+
         {blocks.map((blk) => {
           const isSelected = !isLivePreview && blk.id === selectedBlockId;
 
@@ -137,8 +155,12 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
               {/* RENDER BLOCK TYPES */}
               {blk.type === 'hero' && (
-                <section className="relative px-6 py-20 md:py-28 text-center overflow-hidden border-b border-slate-800/60 bg-linear-to-b from-slate-900/40 to-slate-950">
-                  <div className="max-w-3xl mx-auto space-y-6">
+                <section
+                  className={`relative text-center overflow-hidden border-b border-slate-800/60 bg-linear-to-b from-slate-900/40 to-slate-950 ${
+                    isMobile ? 'px-4 py-12' : isTablet ? 'px-6 py-16' : 'px-6 py-20 md:py-28'
+                  }`}
+                >
+                  <div className="max-w-3xl mx-auto space-y-5">
                     {/* Badge */}
                     <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${themeCls.badge}`}>
                       <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
@@ -146,17 +168,33 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                     </div>
 
                     {/* Headline */}
-                    <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
+                    <h1
+                      className={`font-black tracking-tight text-white leading-tight ${
+                        isMobile
+                          ? 'text-2xl leading-snug'
+                          : isTablet
+                          ? 'text-3xl leading-snug'
+                          : 'text-3xl md:text-5xl'
+                      }`}
+                    >
                       {blk.headline}
                     </h1>
 
                     {/* Subheadline */}
-                    <p className="text-sm md:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                    <p
+                      className={`text-slate-300 mx-auto leading-relaxed ${
+                        isMobile ? 'text-xs' : 'text-sm md:text-base max-w-2xl'
+                      }`}
+                    >
                       {blk.subheadline}
                     </p>
 
                     {/* CTA Buttons */}
-                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <div
+                      className={`pt-2 flex items-center justify-center gap-3 ${
+                        isMobile ? 'flex-col w-full' : 'flex-col sm:flex-row'
+                      }`}
+                    >
                       <a
                         href={`https://wa.me/${blk.ctaWhatsapp}?text=Halo%20Admin,%20saya%20tertarik%20dengan%20program%20pelatihan`}
                         target="_blank"
@@ -168,7 +206,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                       </a>
                       <a
                         href="#programs"
-                        className="w-full sm:w-auto px-5 py-3.5 rounded-xl font-medium text-sm text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800 transition"
+                        className="w-full sm:w-auto px-5 py-3.5 rounded-xl font-medium text-sm text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800 transition text-center"
                       >
                         {blk.secondaryCtaText}
                       </a>
@@ -176,7 +214,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
                     {/* Trust Text */}
                     {blk.trustText && (
-                      <div className="pt-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+                      <div className="pt-3 flex items-center justify-center gap-2 text-xs text-slate-400">
                         <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                         <span>{blk.trustText}</span>
                       </div>
@@ -186,17 +224,36 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               )}
 
               {blk.type === 'stats' && (
-                <section className="px-6 py-12 border-b border-slate-800/60 bg-slate-900/20">
-                  <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <section
+                  className={`border-b border-slate-800/60 bg-slate-900/20 ${
+                    isMobile ? 'px-4 py-8' : 'px-6 py-12'
+                  }`}
+                >
+                  <div
+                    className={`max-w-4xl mx-auto grid text-center ${
+                      isMobile
+                        ? 'grid-cols-2 gap-3'
+                        : isTablet
+                        ? 'grid-cols-2 gap-5'
+                        : 'grid-cols-2 md:grid-cols-4 gap-6'
+                    }`}
+                  >
                     {blk.items.map((stat, sIdx) => (
-                      <div key={sIdx} className="space-y-1">
-                        <div className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                      <div
+                        key={sIdx}
+                        className={`space-y-1 p-3 rounded-xl border border-slate-800/60 bg-slate-900/40`}
+                      >
+                        <div
+                          className={`font-extrabold text-white tracking-tight ${
+                            isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
+                          }`}
+                        >
                           {stat.value}
                         </div>
                         <div className="text-xs font-semibold text-indigo-400">
                           {stat.label}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-slate-400 leading-snug">
                           {stat.description}
                         </div>
                       </div>
@@ -206,10 +263,19 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               )}
 
               {blk.type === 'programs' && (
-                <section id="programs" className="px-6 py-16 border-b border-slate-800/60">
-                  <div className="max-w-4xl mx-auto space-y-10">
+                <section
+                  id="programs"
+                  className={`border-b border-slate-800/60 ${
+                    isMobile ? 'px-4 py-10 space-y-6' : 'px-6 py-16 space-y-10'
+                  }`}
+                >
+                  <div className="max-w-4xl mx-auto space-y-8">
                     <div className="text-center space-y-2">
-                      <h2 className="text-2xl md:text-3xl font-bold text-white">
+                      <h2
+                        className={`font-bold text-white ${
+                          isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
+                        }`}
+                      >
                         {blk.title}
                       </h2>
                       <p className="text-xs md:text-sm text-slate-400 max-w-xl mx-auto">
@@ -217,11 +283,19 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                       </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div
+                      className={`grid ${
+                        isMobile
+                          ? 'grid-cols-1 gap-4'
+                          : isTablet
+                          ? 'grid-cols-2 gap-4'
+                          : 'grid-cols-1 md:grid-cols-3 gap-6'
+                      }`}
+                    >
                       {blk.items.map((prog, pIdx) => (
                         <div
                           key={pIdx}
-                          className={`rounded-2xl p-6 flex flex-col justify-between border bg-slate-900/60 transition ${
+                          className={`rounded-2xl p-5 md:p-6 flex flex-col justify-between border bg-slate-900/60 transition ${
                             prog.isPopular
                               ? 'border-indigo-500/60 shadow-lg shadow-indigo-500/10'
                               : 'border-slate-800/80 hover:border-slate-700'
@@ -281,13 +355,21 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               )}
 
               {blk.type === 'lead-form' && (
-                <section className="px-6 py-16 border-b border-slate-800/60 bg-linear-to-b from-slate-950 via-slate-900/30 to-slate-950">
+                <section
+                  className={`border-b border-slate-800/60 bg-linear-to-b from-slate-950 via-slate-900/30 to-slate-950 ${
+                    isMobile ? 'px-4 py-10 space-y-4' : 'px-6 py-16 space-y-6'
+                  }`}
+                >
                   <div className="max-w-xl mx-auto space-y-6 text-center">
                     <div className="space-y-2">
                       <span className="inline-block text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
                         {blk.badge}
                       </span>
-                      <h2 className="text-2xl md:text-3xl font-bold text-white">
+                      <h2
+                        className={`font-bold text-white ${
+                          isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
+                        }`}
+                      >
                         {blk.headline}
                       </h2>
                       <p className="text-xs md:text-sm text-slate-400">
@@ -297,7 +379,9 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
                     <form
                       onSubmit={(e) => handleFormSubmit(e, blk.whatsappDirectNumber)}
-                      className="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl shadow-xl text-left space-y-4"
+                      className={`bg-slate-900/90 border border-slate-800 shadow-xl text-left space-y-4 ${
+                        isMobile ? 'p-4 rounded-xl' : 'p-6 rounded-2xl'
+                      }`}
                     >
                       <div>
                         <label className="block text-xs font-medium text-slate-300 mb-1">
@@ -378,10 +462,18 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               )}
 
               {blk.type === 'testimonials' && (
-                <section className="px-6 py-16 border-b border-slate-800/60">
-                  <div className="max-w-4xl mx-auto space-y-10">
+                <section
+                  className={`border-b border-slate-800/60 ${
+                    isMobile ? 'px-4 py-10 space-y-6' : 'px-6 py-16 space-y-10'
+                  }`}
+                >
+                  <div className="max-w-4xl mx-auto space-y-8">
                     <div className="text-center space-y-2">
-                      <h2 className="text-2xl md:text-3xl font-bold text-white">
+                      <h2
+                        className={`font-bold text-white ${
+                          isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
+                        }`}
+                      >
                         {blk.title}
                       </h2>
                       <p className="text-xs md:text-sm text-slate-400">
@@ -389,7 +481,15 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                       </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div
+                      className={`grid ${
+                        isMobile
+                          ? 'grid-cols-1 gap-4'
+                          : isTablet
+                          ? 'grid-cols-2 gap-4'
+                          : 'grid-cols-1 md:grid-cols-3 gap-6'
+                      }`}
+                    >
                       {blk.items.map((testi, tIdx) => (
                         <div
                           key={tIdx}
@@ -422,10 +522,18 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               )}
 
               {blk.type === 'faq' && (
-                <section className="px-6 py-16 border-b border-slate-800/60 bg-slate-900/20">
-                  <div className="max-w-2xl mx-auto space-y-8">
+                <section
+                  className={`border-b border-slate-800/60 bg-slate-900/20 ${
+                    isMobile ? 'px-4 py-10 space-y-6' : 'px-6 py-16 space-y-8'
+                  }`}
+                >
+                  <div className="max-w-2xl mx-auto space-y-6">
                     <div className="text-center space-y-2">
-                      <h2 className="text-2xl md:text-3xl font-bold text-white">
+                      <h2
+                        className={`font-bold text-white ${
+                          isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
+                        }`}
+                      >
                         {blk.title}
                       </h2>
                       <p className="text-xs md:text-sm text-slate-400">
@@ -433,7 +541,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                       </p>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       {blk.items.map((faq, fIdx) => {
                         const isOpen = openFaqIndex === fIdx;
                         return (
@@ -443,17 +551,17 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                           >
                             <button
                               onClick={() => setOpenFaqIndex(isOpen ? null : fIdx)}
-                              className="w-full p-4 text-left flex items-center justify-between text-xs font-bold text-slate-200 hover:text-white"
+                              className="w-full p-3.5 md:p-4 text-left flex items-center justify-between text-xs font-bold text-slate-200 hover:text-white"
                             >
                               <span>{faq.question}</span>
                               <ChevronDown
-                                className={`w-4 h-4 text-slate-400 transition-transform ${
+                                className={`w-4 h-4 text-slate-400 shrink-0 ml-2 transition-transform ${
                                   isOpen ? 'rotate-180 text-indigo-400' : ''
                                 }`}
                               />
                             </button>
                             {isOpen && (
-                              <div className="px-4 pb-4 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3">
+                              <div className="px-3.5 md:px-4 pb-3.5 md:pb-4 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3">
                                 {faq.answer}
                               </div>
                             )}
@@ -466,12 +574,20 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               )}
 
               {blk.type === 'cta-banner' && (
-                <section className="px-6 py-16 border-b border-slate-800/60 bg-linear-to-r from-indigo-950 via-slate-900 to-violet-950 text-center">
-                  <div className="max-w-2xl mx-auto space-y-5">
+                <section
+                  className={`border-b border-slate-800/60 bg-linear-to-r from-indigo-950 via-slate-900 to-violet-950 text-center ${
+                    isMobile ? 'px-4 py-10 space-y-4' : 'px-6 py-16 space-y-5'
+                  }`}
+                >
+                  <div className="max-w-2xl mx-auto space-y-4">
                     <span className="inline-block text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
                       {blk.badge}
                     </span>
-                    <h2 className="text-2xl md:text-4xl font-extrabold text-white">
+                    <h2
+                      className={`font-extrabold text-white leading-tight ${
+                        isMobile ? 'text-xl' : 'text-2xl md:text-4xl'
+                      }`}
+                    >
                       {blk.headline}
                     </h2>
                     <p className="text-xs md:text-sm text-slate-300">
@@ -482,7 +598,9 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                         href={`https://wa.me/${blk.whatsappNumber}?text=Halo%20Admin,%20saya%20mau%20konsultasi%20sekarang`}
                         target="_blank"
                         rel="noreferrer"
-                        className={`inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm shadow-xl transition active:scale-95 ${themeCls.btnPrimary}`}
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl font-bold text-sm shadow-xl transition active:scale-95 ${
+                          isMobile ? 'w-full py-3.5' : 'px-8 py-3.5'
+                        } ${themeCls.btnPrimary}`}
                       >
                         <MessageCircle className="w-4 h-4" />
                         <span>{blk.buttonText}</span>
@@ -493,20 +611,36 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               )}
 
               {blk.type === 'footer' && (
-                <footer className="px-6 py-12 bg-slate-950 border-t border-slate-800 text-xs text-slate-400">
-                  <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+                <footer
+                  className={`bg-slate-950 border-t border-slate-800 text-xs text-slate-400 ${
+                    isMobile ? 'px-4 py-8' : 'px-6 py-12'
+                  }`}
+                >
+                  <div
+                    className={`max-w-4xl mx-auto flex gap-6 ${
+                      isMobile
+                        ? 'flex-col items-center text-center space-y-4'
+                        : 'flex-col md:flex-row items-center justify-between text-center md:text-left'
+                    }`}
+                  >
                     <div className="space-y-1.5">
                       <div className="font-bold text-base text-white">{blk.brandName}</div>
                       <p className="max-w-sm text-slate-400 text-xs">{blk.tagline}</p>
                       <p className="text-xs text-slate-400">{blk.address}</p>
                     </div>
 
-                    <div className="space-y-2 text-center md:text-right">
+                    <div
+                      className={`space-y-2.5 ${
+                        isMobile ? 'flex flex-col items-center w-full' : 'text-center md:text-right'
+                      }`}
+                    >
                       <a
                         href={`https://wa.me/${blk.whatsappNumber}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 transition text-xs"
+                        className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 transition text-xs ${
+                          isMobile ? 'w-full max-w-xs justify-center' : ''
+                        }`}
                       >
                         <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
                         <span>Hubungi via WhatsApp</span>
@@ -521,6 +655,13 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
             </div>
           );
         })}
+
+        {/* Mobile Device Bottom Bar Mockup */}
+        {isMobile && (
+          <div className="bg-slate-950 py-2.5 flex justify-center border-t border-slate-900 select-none">
+            <div className="w-28 h-1 bg-slate-700/70 rounded-full" />
+          </div>
+        )}
       </div>
     </main>
   );

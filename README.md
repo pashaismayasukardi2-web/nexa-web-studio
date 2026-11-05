@@ -53,3 +53,4 @@ Buka [http://localhost:3000](http://localhost:3000) di browsermu.
 
 Project ini terintegrasi otomatis dengan Vercel melalui GitHub CI/CD:
 - Setiap push ke branch `main` pada `pashaismayasukardi2-web/nexa-web-studio` akan memicu deployment otomatis ke `https://studio.nexamos.cloud`.
+
