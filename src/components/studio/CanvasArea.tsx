@@ -10,7 +10,9 @@ import {
   ShieldCheck, 
   MapPin, 
   Calendar,
-  Send
+  Send,
+  Menu,
+  X
 } from 'lucide-react';
 import { BlockItem, DeviceView, StudioTheme, TenantType } from '../../types/builder';
 
@@ -35,6 +37,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [formData, setFormData] = useState({ name: '', phone: '', school: '', program: '' });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const mainRef = useRef<HTMLElement | null>(null);
   const blockRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -154,8 +157,137 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               )}
 
               {/* RENDER BLOCK TYPES */}
+              {blk.type === 'header' && (
+                <header
+                  id="header"
+                  className={`w-full border-b border-slate-800/80 bg-slate-950/95 backdrop-blur-md transition-all ${
+                    blk.isSticky ? 'sticky top-0 z-30 shadow-md' : 'relative z-10'
+                  }`}
+                >
+                  <div
+                    className={`mx-auto flex items-center justify-between ${
+                      isMobile ? 'px-4 py-3' : isTablet ? 'px-6 py-3.5' : 'px-8 py-4 max-w-6xl'
+                    }`}
+                  >
+                    {/* Brand / Logo */}
+                    <div className="flex items-center gap-3">
+                      {blk.logoUrl ? (
+                        <img
+                          src={blk.logoUrl}
+                          alt={blk.brandName}
+                          className="h-8 max-w-32 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-linear-to-tr from-indigo-600 to-violet-600 flex items-center justify-center font-black text-white text-xs shadow-md shadow-indigo-600/30">
+                          {blk.brandName ? blk.brandName.charAt(0).toUpperCase() : 'N'}
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        <span className="font-bold text-white text-sm tracking-tight truncate max-w-44 sm:max-w-xs">
+                          {blk.brandName || 'Nama Brand'}
+                        </span>
+                        {blk.tagline && (
+                          <span className="text-xs text-slate-400 truncate max-w-44 sm:max-w-xs hidden sm:block">
+                            {blk.tagline}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Desktop & Tablet Navigation Menu */}
+                    {!isMobile && (
+                      <nav className="flex items-center gap-6 text-xs font-medium text-slate-300">
+                        {(blk.navItems || []).map((nav) => (
+                          <a
+                            key={nav.id}
+                            href={nav.href}
+                            className="hover:text-white transition hover:underline underline-offset-4"
+                            onClick={(e) => {
+                              if (!isLivePreview) {
+                                e.preventDefault();
+                              }
+                            }}
+                          >
+                            {nav.label}
+                          </a>
+                        ))}
+                      </nav>
+                    )}
+
+                    {/* Right Action: CTA Button on Desktop, Hamburger Button on Mobile */}
+                    <div className="flex items-center gap-2">
+                      {!isMobile ? (
+                        <a
+                          href={`https://wa.me/${blk.ctaWhatsapp}?text=Halo%20Admin%2C%20saya%20ingin%20konsultasi`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm ${themeCls.btnPrimary}`}
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>{blk.ctaText}</span>
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsMobileMenuOpen(!isMobileMenuOpen);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition"
+                          aria-label="Toggle Menu Navigasi"
+                        >
+                          {isMobileMenuOpen ? (
+                            <X className="w-5 h-5" />
+                          ) : (
+                            <Menu className="w-5 h-5" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mobile Dropdown Drawer Menu */}
+                  {isMobile && isMobileMenuOpen && (
+                    <div className="border-t border-slate-800/80 bg-slate-950/98 px-4 py-4 space-y-3">
+                      <nav className="flex flex-col space-y-1">
+                        {(blk.navItems || []).map((nav) => (
+                          <a
+                            key={nav.id}
+                            href={nav.href}
+                            onClick={(e) => {
+                              if (!isLivePreview) e.preventDefault();
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-900 transition flex items-center justify-between"
+                          >
+                            <span>{nav.label}</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
+                          </a>
+                        ))}
+                      </nav>
+                      <div className="pt-2 border-t border-slate-900">
+                        <a
+                          href={`https://wa.me/${blk.ctaWhatsapp}?text=Halo%20Admin%2C%20saya%20ingin%20konsultasi`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`w-full py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition ${themeCls.btnPrimary}`}
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>{blk.ctaText}</span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </header>
+              )}
+
+              {/* RENDER BLOCK TYPES */}
               {blk.type === 'hero' && (
                 <section
+                  id="beranda"
                   className={`relative text-center overflow-hidden border-b border-slate-800/60 bg-linear-to-b from-slate-900/40 to-slate-950 ${
                     isMobile ? 'px-4 py-12' : isTablet ? 'px-6 py-16' : 'px-6 py-20 md:py-28'
                   }`}
@@ -225,6 +357,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
               {blk.type === 'stats' && (
                 <section
+                  id="stats"
                   className={`border-b border-slate-800/60 bg-slate-900/20 ${
                     isMobile ? 'px-4 py-8' : 'px-6 py-12'
                   }`}
@@ -356,6 +489,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
               {blk.type === 'lead-form' && (
                 <section
+                  id="daftar"
                   className={`border-b border-slate-800/60 bg-linear-to-b from-slate-950 via-slate-900/30 to-slate-950 ${
                     isMobile ? 'px-4 py-10 space-y-4' : 'px-6 py-16 space-y-6'
                   }`}
@@ -463,6 +597,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
               {blk.type === 'testimonials' && (
                 <section
+                  id="testimoni"
                   className={`border-b border-slate-800/60 ${
                     isMobile ? 'px-4 py-10 space-y-6' : 'px-6 py-16 space-y-10'
                   }`}
@@ -523,6 +658,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
               {blk.type === 'faq' && (
                 <section
+                  id="faq"
                   className={`border-b border-slate-800/60 bg-slate-900/20 ${
                     isMobile ? 'px-4 py-10 space-y-6' : 'px-6 py-16 space-y-8'
                   }`}
@@ -575,6 +711,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
               {blk.type === 'cta-banner' && (
                 <section
+                  id="cta"
                   className={`border-b border-slate-800/60 bg-linear-to-r from-indigo-950 via-slate-900 to-violet-950 text-center ${
                     isMobile ? 'px-4 py-10 space-y-4' : 'px-6 py-16 space-y-5'
                   }`}
@@ -612,6 +749,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
               {blk.type === 'footer' && (
                 <footer
+                  id="kontak"
                   className={`bg-slate-950 border-t border-slate-800 text-xs text-slate-400 ${
                     isMobile ? 'px-4 py-8' : 'px-6 py-12'
                   }`}

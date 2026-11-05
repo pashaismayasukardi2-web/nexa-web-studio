@@ -9,6 +9,23 @@ export const initialPageConfig: PageConfig = {
   metaDescription: 'Program Pelatihan Kerja Terpadu & Penyaluran Resmi ke Jepang dan Jerman. Garansi Pembinaan Bahasa, Skill & Mental Bersertifikat.',
   blocks: [
     {
+      id: 'blk_header_1',
+      type: 'header',
+      title: 'Top Bar & Navigasi Halaman',
+      brandName: 'LPK Cakrawala Global',
+      tagline: 'Resmi Penyaluran Jepang & Jerman',
+      logoUrl: '',
+      navItems: [
+        { id: 'nav_1', label: 'Program', href: '#programs' },
+        { id: 'nav_2', label: 'Prestasi', href: '#stats' },
+        { id: 'nav_3', label: 'Testimoni', href: '#testimoni' },
+        { id: 'nav_4', label: 'FAQ', href: '#faq' },
+      ],
+      ctaText: 'Konsultasi Gratis',
+      ctaWhatsapp: '6281234567890',
+      isSticky: true,
+    },
+    {
       id: 'blk_hero_1',
       type: 'hero',
       title: 'Header Hero Banner',

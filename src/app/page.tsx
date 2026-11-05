@@ -32,6 +32,25 @@ export default function WebStudioPage() {
     let newBlock: BlockItem;
 
     switch (type) {
+      case 'header':
+        newBlock = {
+          id: newId,
+          type: 'header',
+          title: 'Top Bar & Navigasi',
+          brandName: pageConfig.tenantName,
+          tagline: 'Lembaga Pelatihan & Penempatan Kerja Resmi',
+          logoUrl: '',
+          navItems: [
+            { id: `nav_1_${Date.now()}`, label: 'Program', href: '#programs' },
+            { id: `nav_2_${Date.now()}`, label: 'Prestasi', href: '#stats' },
+            { id: `nav_3_${Date.now()}`, label: 'Testimoni', href: '#testimoni' },
+            { id: `nav_4_${Date.now()}`, label: 'FAQ', href: '#faq' },
+          ],
+          ctaText: 'Konsultasi Gratis',
+          ctaWhatsapp: '6281234567890',
+          isSticky: true,
+        };
+        break;
       case 'hero':
         newBlock = {
           id: newId,
@@ -153,7 +172,7 @@ export default function WebStudioPage() {
 
     setPageConfig((prev) => ({
       ...prev,
-      blocks: [...prev.blocks, newBlock],
+      blocks: type === 'header' ? [newBlock, ...prev.blocks] : [...prev.blocks, newBlock],
     }));
     setSelectedBlockId(newId);
   };

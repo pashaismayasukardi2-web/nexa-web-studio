@@ -13,7 +13,8 @@ import {
   Sliders, 
   Trash2, 
   ChevronUp, 
-  ChevronDown 
+  ChevronDown,
+  Navigation
 } from 'lucide-react';
 import { BlockItem, BlockType } from '../../types/builder';
 
@@ -27,6 +28,7 @@ interface SidebarBlockPickerProps {
 }
 
 const AVAILABLE_BLOCKS: Array<{ type: BlockType; label: string; desc: string; icon: any }> = [
+  { type: 'header', label: 'Top Bar & Navigasi', desc: 'Logo, menu tautan, & tombol CTA', icon: Navigation },
   { type: 'hero', label: 'Hero Banner', desc: 'Cover headline, CTA tombol WhatsApp', icon: Layout },
   { type: 'stats', label: 'Metrik & Bukti', desc: 'Angka statistik dan key metrics', icon: BarChart2 },
   { type: 'programs', label: 'Kartu Program / Produk', desc: 'Daftar penawaran dan spesifikasi', icon: Briefcase },

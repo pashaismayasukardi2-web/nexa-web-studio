@@ -5,6 +5,7 @@ export type TenantType = 'LPK' | 'General';
 export type StudioTheme = 'indigo' | 'emerald' | 'violet' | 'amber';
 
 export type BlockType = 
+  | 'header'
   | 'hero'
   | 'stats'
   | 'features'
@@ -19,6 +20,23 @@ export interface BaseBlock {
   id: string;
   type: BlockType;
   title: string;
+}
+
+export interface HeaderNavItem {
+  id: string;
+  label: string;
+  href: string;
+}
+
+export interface HeaderBlock extends BaseBlock {
+  type: 'header';
+  brandName: string;
+  logoUrl?: string;
+  tagline?: string;
+  navItems: HeaderNavItem[];
+  ctaText: string;
+  ctaWhatsapp: string;
+  isSticky: boolean;
 }
 
 export interface HeroBlock extends BaseBlock {
@@ -117,6 +135,7 @@ export interface FooterBlock extends BaseBlock {
 }
 
 export type BlockItem = 
+  | HeaderBlock
   | HeroBlock
   | StatsBlock
   | FeaturesBlock
