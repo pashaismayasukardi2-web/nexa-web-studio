@@ -111,42 +111,56 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
       {/* Center: Device Viewport Switcher */}
       <div className="flex items-center gap-1 bg-slate-900/90 border border-slate-800 p-1 rounded-xl shadow-inner">
-        <button
-          onClick={() => setDevice('desktop')}
-          title="Tampilan Desktop (100%)"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-            device === 'desktop'
-              ? 'bg-slate-800 text-white shadow'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Laptop className="w-4 h-4" />
-          <span className="hidden sm:inline">Desktop</span>
-        </button>
-        <button
-          onClick={() => setDevice('tablet')}
-          title="Tampilan Tablet (768px)"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-            device === 'tablet'
-              ? 'bg-slate-800 text-white shadow'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Tablet className="w-4 h-4" />
-          <span className="hidden sm:inline">Tablet</span>
-        </button>
-        <button
-          onClick={() => setDevice('mobile')}
-          title="Tampilan Ponsel (390px)"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-            device === 'mobile'
-              ? 'bg-slate-800 text-white shadow'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Smartphone className="w-4 h-4" />
-          <span className="hidden sm:inline">Ponsel</span>
-        </button>
+        <div className="relative group">
+          <button
+            onClick={() => setDevice('desktop')}
+            aria-label="Tampilan Desktop (100%)"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${
+              device === 'desktop'
+                ? 'bg-slate-800 text-white shadow'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <Laptop className="w-4 h-4" />
+          </button>
+          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            Tampilan Desktop (100%)
+          </div>
+        </div>
+
+        <div className="relative group">
+          <button
+            onClick={() => setDevice('tablet')}
+            aria-label="Tampilan Tablet (768px)"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${
+              device === 'tablet'
+                ? 'bg-slate-800 text-white shadow'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <Tablet className="w-4 h-4" />
+          </button>
+          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            Tampilan Tablet (768px)
+          </div>
+        </div>
+
+        <div className="relative group">
+          <button
+            onClick={() => setDevice('mobile')}
+            aria-label="Tampilan Ponsel (384px)"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${
+              device === 'mobile'
+                ? 'bg-slate-800 text-white shadow'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <Smartphone className="w-4 h-4" />
+          </button>
+          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            Tampilan Ponsel (384px)
+          </div>
+        </div>
       </div>
 
       {/* Right: Theme Selector, Mode Toggle & Actions */}
@@ -187,44 +201,54 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         </div>
 
         {/* Live Preview Toggle */}
-        <button
-          onClick={() => setIsLivePreview(!isLivePreview)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
-            isLivePreview
-              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 shadow'
-              : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
-          }`}
-        >
-          {isLivePreview ? (
-            <>
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>Mode Editor</span>
-            </>
-          ) : (
-            <>
-              <Eye className="w-3.5 h-3.5" />
-              <span>Pratinjau Live</span>
-            </>
-          )}
-        </button>
+        <div className="relative group">
+          <button
+            onClick={() => setIsLivePreview(!isLivePreview)}
+            aria-label={isLivePreview ? 'Mode Editor' : 'Pratinjau Live'}
+            className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-medium border transition ${
+              isLivePreview
+                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 shadow'
+                : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800 hover:text-white'
+            }`}
+          >
+            {isLivePreview ? (
+              <Edit3 className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
+          </button>
+          <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            {isLivePreview ? 'Mode Editor' : 'Pratinjau Live'}
+          </div>
+        </div>
 
         {/* Code Modal Button */}
-        <button
-          onClick={onOpenCodeModal}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 transition"
-        >
-          <Code className="w-3.5 h-3.5" />
-          <span>Lihat Kode</span>
-        </button>
+        <div className="relative group hidden sm:block">
+          <button
+            onClick={onOpenCodeModal}
+            aria-label="Lihat Kode"
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 hover:text-white transition"
+          >
+            <Code className="w-4 h-4" />
+          </button>
+          <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            Lihat Kode
+          </div>
+        </div>
 
         {/* Export Button */}
-        <button
-          onClick={onExportHtml}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/30 hover:brightness-110 transition active:scale-95"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Ekspor Web</span>
-        </button>
+        <div className="relative group">
+          <button
+            onClick={onExportHtml}
+            aria-label="Ekspor Web"
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-semibold bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/30 hover:brightness-110 transition active:scale-95"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+          <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            Ekspor Web
+          </div>
+        </div>
 
         {/* Divider */}
         <div className="h-5 w-px bg-slate-800 mx-1 hidden sm:block" />
