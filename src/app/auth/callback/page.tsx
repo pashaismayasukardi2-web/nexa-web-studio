@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { handleCallback } from '../../../lib/auth';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-export default function AuthCallbackPage() {
+function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -122,6 +122,41 @@ export default function AuthCallbackPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-2xl p-8 shadow-2xl backdrop-blur-md text-center">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-indigo-600 via-violet-600 to-fuchsia-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/20">
+                N
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-white text-lg tracking-tight">NexaMOS</div>
+                <div className="text-xs text-indigo-400 font-medium">Single Sign-On</div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-4 py-4">
+              <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+              <div>
+                <h2 className="text-white font-semibold text-base mb-1">
+                  Menghubungkan Akun NexaMOS...
+                </h2>
+                <p className="text-slate-400 text-xs">
+                  Sedang menyiapkan autentikasi...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <CallbackContent />
+    </Suspense>
   );
 }
 
