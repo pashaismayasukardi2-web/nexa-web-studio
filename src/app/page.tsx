@@ -202,7 +202,7 @@ export default function WebStudioPage() {
       />
 
       {/* Main Studio Body: Sidebar | Canvas | Inspector */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Left: Section Block Picker & Reorder */}
         {!isLivePreview && (
           <SidebarBlockPicker

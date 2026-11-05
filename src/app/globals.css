@@ -13,6 +13,11 @@
   input, select, textarea {
     color: #f8fafc;
   }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #334155 #0f172a;
+  }
 }
 
 body {

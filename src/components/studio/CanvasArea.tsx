@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Check, 
   MessageCircle, 
@@ -35,6 +35,17 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [formData, setFormData] = useState({ name: '', phone: '', school: '', program: '' });
+  const blockRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Auto-scroll canvas to selected block when selected from sidebar or newly added
+  useEffect(() => {
+    if (selectedBlockId && blockRefs.current[selectedBlockId]) {
+      blockRefs.current[selectedBlockId]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [selectedBlockId]);
 
   // Theme color maps
   const getThemeClasses = () => {
@@ -95,9 +106,9 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   };
 
   return (
-    <main className="flex-1 bg-slate-900/60 overflow-y-auto flex flex-col items-center p-4">
+    <main className="flex-1 bg-slate-900/60 overflow-y-auto flex flex-col items-center p-4 min-h-0">
       <div
-        className={`${getDeviceWidthClass()} bg-slate-950 transition-all duration-300 overflow-hidden min-h-screen text-slate-100 relative shadow-2xl border border-slate-800/80`}
+        className={`${getDeviceWidthClass()} bg-slate-950 transition-all duration-300 overflow-hidden min-h-full shrink-0 text-slate-100 relative shadow-2xl border border-slate-800/80`}
       >
         {blocks.map((blk) => {
           const isSelected = !isLivePreview && blk.id === selectedBlockId;
@@ -105,6 +116,9 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
           return (
             <div
               key={blk.id}
+              ref={(el) => {
+                blockRefs.current[blk.id] = el;
+              }}
               onClick={() => !isLivePreview && onSelectBlock(blk.id)}
               className={`relative transition ${
                 !isLivePreview ? 'cursor-pointer hover:ring-2 hover:ring-indigo-500/50' : ''
