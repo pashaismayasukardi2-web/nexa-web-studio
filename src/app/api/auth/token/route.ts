@@ -43,15 +43,24 @@ export async function POST(req: NextRequest) {
     const tokenData = await tokenRes.json();
     const { access_token, id_token, expires_in } = tokenData;
 
-    // 2. Decode ID token payload
+    // 2. Decode ID token & Access token payload
     let idPayload: any = {};
+    let accessPayload: any = {};
     try {
-      const parts = id_token.split('.');
-      if (parts.length === 3) {
-        idPayload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+      if (id_token) {
+        const parts = id_token.split('.');
+        if (parts.length === 3) {
+          idPayload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+        }
+      }
+      if (access_token) {
+        const parts = access_token.split('.');
+        if (parts.length === 3) {
+          accessPayload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+        }
       }
     } catch (e) {
-      console.warn('Gagal decode ID token payload di server:', e);
+      console.warn('Gagal decode token payload di server:', e);
     }
 
     // 3. Ambil data profil dari NexaMOS Identity API
@@ -114,6 +123,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Susun Session Resmi
+    const rawRoles: string[] = [
+      ...(idPayload.realm_access?.roles || []),
+      ...(accessPayload.realm_access?.roles || []),
+      ...(idPayload.resource_access?.[CLIENT_ID]?.roles || []),
+      ...(accessPayload.resource_access?.[CLIENT_ID]?.roles || []),
+    ];
+    const uniqueRoles = Array.from(new Set(rawRoles));
+
     const session = {
       user: {
         id: userMe?.id || idPayload.sub || '',
@@ -122,7 +139,7 @@ export async function POST(req: NextRequest) {
         email: userMe?.email || idPayload.email || null,
         email_verified: Boolean(userMe?.email_verified ?? idPayload.email_verified),
         status: userMe?.status || 'active',
-        roles: idPayload.realm_access?.roles || [],
+        roles: uniqueRoles,
         organizations,
         entitlements,
       },
