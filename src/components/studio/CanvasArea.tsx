@@ -35,15 +35,19 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [formData, setFormData] = useState({ name: '', phone: '', school: '', program: '' });
+  const mainRef = useRef<HTMLElement | null>(null);
   const blockRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Auto-scroll canvas to selected block when selected from sidebar or newly added
   useEffect(() => {
-    if (selectedBlockId && blockRefs.current[selectedBlockId]) {
-      blockRefs.current[selectedBlockId]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+    if (selectedBlockId && blockRefs.current[selectedBlockId] && mainRef.current) {
+      const target = blockRefs.current[selectedBlockId];
+      if (target) {
+        mainRef.current.scrollTo({
+          top: target.offsetTop,
+          behavior: 'smooth',
+        });
+      }
     }
   }, [selectedBlockId]);
 
@@ -106,7 +110,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   };
 
   return (
-    <main className="flex-1 bg-slate-900/60 overflow-y-auto flex flex-col items-center p-4 min-h-0">
+    <main ref={mainRef} className="flex-1 bg-slate-900/60 overflow-y-auto flex flex-col items-center p-4 min-h-0">
       <div
         className={`${getDeviceWidthClass()} bg-slate-950 transition-all duration-300 overflow-hidden min-h-full shrink-0 text-slate-100 relative shadow-2xl border border-slate-800/80`}
       >
