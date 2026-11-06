@@ -359,7 +359,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
                           type="text"
                           value={requestedDomain}
                           onChange={(e) => setRequestedDomain(e.target.value)}
-                          placeholder="Contoh: lpk-cakrawala.com"
+                          placeholder="Contoh: namadomainkamu.com"
                           className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono shadow-inner"
                         />
                       </div>
@@ -449,7 +449,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
                           setCustomDomainInput(e.target.value);
                           setCustomDomainStatus('idle');
                         }}
-                        placeholder="Masukkan domain Anda (misal: daftar.lpkcakrawala.com)"
+                        placeholder="Masukkan domain Anda (misal: namadomainkamu.com)"
                         className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-slate-600 font-mono"
                       />
                       <button
