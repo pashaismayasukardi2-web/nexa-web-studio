@@ -53,7 +53,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
   // WhatsApp Concierge URL (Order Terima Beres)
   const targetDomain = requestedDomain.trim() || defaultDomainSuggestion;
   const waOrderText = `Halo Tim NexaMOS, saya mau pesan *Layanan Domain Terima Beres* (Rp 300.000/thn) untuk landing page *${pageConfig.tenantName}*.\n\nDomain yang saya inginkan: *${targetDomain}*\n\nMohon dibantu proses pendaftaran dan setup SSL sampai tayang. Terima kasih!`;
-  const waOrderUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(waOrderText)}`;
+  const waOrderUrl = `https://wa.me/6285659024775?text=${encodeURIComponent(waOrderText)}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(publicUrl);
@@ -203,8 +203,8 @@ export const PublishModal: React.FC<PublishModalProps> = ({
           <button
             onClick={() => setActiveTab('publish')}
             className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${activeTab === 'publish'
-                ? 'border-indigo-500 text-white bg-slate-800/70'
-                : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
+              ? 'border-indigo-500 text-white bg-slate-800/70'
+              : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
               }`}
           >
             <Rocket className="w-3.5 h-3.5 text-indigo-400" />
@@ -214,8 +214,8 @@ export const PublishModal: React.FC<PublishModalProps> = ({
           <button
             onClick={() => setActiveTab('domain')}
             className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${activeTab === 'domain'
-                ? 'border-indigo-500 text-white bg-slate-800/70'
-                : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
+              ? 'border-indigo-500 text-white bg-slate-800/70'
+              : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
               }`}
           >
             <Globe className="w-3.5 h-3.5 text-violet-400" />
@@ -228,8 +228,8 @@ export const PublishModal: React.FC<PublishModalProps> = ({
           <button
             onClick={() => setActiveTab('code')}
             className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${activeTab === 'code'
-                ? 'border-indigo-500 text-white bg-slate-800/70'
-                : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
+              ? 'border-indigo-500 text-white bg-slate-800/70'
+              : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
               }`}
           >
             <Code className="w-3.5 h-3.5 text-slate-400" />
@@ -475,8 +475,8 @@ export const PublishModal: React.FC<PublishModalProps> = ({
                   <button
                     onClick={() => setCodeTab('html')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${codeTab === 'html'
-                        ? 'bg-slate-800 text-white border border-slate-700'
-                        : 'text-slate-400 hover:text-white'
+                      ? 'bg-slate-800 text-white border border-slate-700'
+                      : 'text-slate-400 hover:text-white'
                       }`}
                   >
                     Standalone HTML
@@ -484,8 +484,8 @@ export const PublishModal: React.FC<PublishModalProps> = ({
                   <button
                     onClick={() => setCodeTab('json')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${codeTab === 'json'
-                        ? 'bg-slate-800 text-white border border-slate-700'
-                        : 'text-slate-400 hover:text-white'
+                      ? 'bg-slate-800 text-white border border-slate-700'
+                      : 'text-slate-400 hover:text-white'
                       }`}
                   >
                     Schema JSON
