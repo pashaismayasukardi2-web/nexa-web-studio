@@ -16,7 +16,8 @@ import {
   ShieldCheck,
   Building2,
   ChevronDown,
-  Sparkles
+  Sparkles,
+  Rocket
 } from 'lucide-react';
 import { DeviceView, StudioTheme, TenantType } from '../../types/builder';
 import { useAuth } from '../../context/AuthContext';
@@ -31,8 +32,9 @@ interface TopNavbarProps {
   tenantType: TenantType;
   setTenantType: (t: TenantType) => void;
   pageTitle: string;
-  onOpenCodeModal: () => void;
-  onExportHtml: () => void;
+  onOpenCodeModal?: () => void;
+  onExportHtml?: () => void;
+  onPublish: () => void;
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -47,6 +49,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   pageTitle,
   onOpenCodeModal,
   onExportHtml,
+  onPublish,
 }) => {
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -212,31 +215,18 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           </div>
         </div>
 
-        {/* Code Modal Button */}
-        <div className="relative group hidden sm:block">
-          <button
-            onClick={onOpenCodeModal}
-            aria-label="Lihat Kode"
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 hover:text-white transition"
-          >
-            <Code className="w-4 h-4" />
-          </button>
-          <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-            Lihat Kode
-          </div>
-        </div>
-
-        {/* Export Button */}
+        {/* Publish Button */}
         <div className="relative group">
           <button
-            onClick={onExportHtml}
-            aria-label="Ekspor Web"
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-semibold bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/30 hover:brightness-110 transition active:scale-95"
+            onClick={onPublish || onExportHtml}
+            aria-label="Publikasikan & Kelola Domain"
+            className="h-9 px-3.5 rounded-lg flex items-center gap-1.5 text-xs font-semibold bg-linear-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/30 hover:brightness-110 transition active:scale-95"
           >
-            <Download className="w-4 h-4" />
+            <Rocket className="w-3.5 h-3.5 text-indigo-100" />
+            <span className="hidden sm:inline">Publikasikan</span>
           </button>
           <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-            Ekspor Web
+            Publikasikan & Kelola Domain
           </div>
         </div>
 

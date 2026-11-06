@@ -24,6 +24,7 @@ interface CanvasAreaProps {
   isLivePreview: boolean;
   theme: StudioTheme;
   tenantType: TenantType;
+  isPublicPage?: boolean;
 }
 
 export const CanvasArea: React.FC<CanvasAreaProps> = ({
@@ -34,6 +35,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   isLivePreview,
   theme,
   tenantType,
+  isPublicPage = false,
 }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [formData, setFormData] = useState({ name: '', phone: '', school: '', program: '' });
@@ -91,6 +93,9 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
 
   // Width container per device
   const getDeviceWidthClass = () => {
+    if (isPublicPage) {
+      return 'w-full min-h-screen';
+    }
     switch (device) {
       case 'mobile':
         return 'w-96 max-w-full shadow-2xl rounded-3xl border-8 border-slate-900 my-6';
@@ -115,9 +120,18 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   };
 
   return (
-    <main ref={mainRef} className="flex-1 bg-slate-900/60 overflow-y-auto flex flex-col items-center p-4 min-h-0">
+    <main
+      ref={mainRef}
+      className={
+        isPublicPage
+          ? 'w-full min-h-screen bg-slate-950 overflow-y-auto'
+          : 'flex-1 bg-slate-900/60 overflow-y-auto flex flex-col items-center p-4 min-h-0'
+      }
+    >
       <div
-        className={`${getDeviceWidthClass()} bg-slate-950 transition-all duration-300 overflow-hidden min-h-full shrink-0 text-slate-100 relative shadow-2xl border border-slate-800/80`}
+        className={`${getDeviceWidthClass()} bg-slate-950 transition-all duration-300 overflow-hidden min-h-full shrink-0 text-slate-100 relative ${
+          isPublicPage ? '' : 'shadow-2xl border border-slate-800/80'
+        }`}
       >
         {/* Mobile Device Top Status Bar Mockup */}
         {isMobile && (

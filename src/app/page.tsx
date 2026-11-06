@@ -7,14 +7,14 @@ import { TopNavbar } from '../components/studio/TopNavbar';
 import { SidebarBlockPicker } from '../components/studio/SidebarBlockPicker';
 import { CanvasArea } from '../components/studio/CanvasArea';
 import { InspectorPanel } from '../components/studio/InspectorPanel';
-import { ExportModal } from '../components/studio/ExportModal';
+import { PublishModal } from '../components/studio/PublishModal';
 
 export default function WebStudioPage() {
   const [pageConfig, setPageConfig] = useState<PageConfig>(initialPageConfig);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>('blk_hero_1');
   const [device, setDevice] = useState<DeviceView>('desktop');
   const [isLivePreview, setIsLivePreview] = useState<boolean>(false);
-  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState<boolean>(false);
 
   // Selected Block reference
   const selectedBlock = pageConfig.blocks.find((b) => b.id === selectedBlockId) || null;
@@ -216,8 +216,7 @@ export default function WebStudioPage() {
         tenantType={pageConfig.tenantType}
         setTenantType={(t: TenantType) => setPageConfig((prev) => ({ ...prev, tenantType: t }))}
         pageTitle={pageConfig.title}
-        onOpenCodeModal={() => setIsExportModalOpen(true)}
-        onExportHtml={() => setIsExportModalOpen(true)}
+        onPublish={() => setIsPublishModalOpen(true)}
       />
 
       {/* Main Studio Body: Sidebar | Canvas | Inspector */}
@@ -255,11 +254,11 @@ export default function WebStudioPage() {
         )}
       </div>
 
-      {/* Export / Code Modal */}
-      <ExportModal
+      {/* Publish & Domain Modal */}
+      <PublishModal
         pageConfig={pageConfig}
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
       />
     </div>
   );
