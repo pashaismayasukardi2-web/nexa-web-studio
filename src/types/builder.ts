@@ -169,5 +169,9 @@ export interface PageConfig {
     googleAnalyticsId?: string;
     autoCaptureUtm?: boolean;
   };
+  isPublished?: boolean;
+  publishedAt?: string;
+  publishPlan?: 'free' | 'cloud' | 'custom_domain';
+  customDomain?: string;
 }
 

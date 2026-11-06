@@ -15,6 +15,11 @@ import {
   ExternalLink,
   Link2,
   CheckCircle2,
+  Lock,
+  Zap,
+  ArrowRight,
+  AlertCircle,
+  RotateCcw
 } from 'lucide-react';
 import { PageConfig } from '../../types/builder';
 
@@ -23,6 +28,7 @@ interface PublishModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: 'publish' | 'domain' | 'code';
+  onUpdatePageConfig?: (config: PageConfig) => void;
 }
 
 export const PublishModal: React.FC<PublishModalProps> = ({
@@ -30,6 +36,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
   isOpen,
   onClose,
   defaultTab = 'publish',
+  onUpdatePageConfig,
 }) => {
   const [activeTab, setActiveTab] = useState<'publish' | 'domain' | 'code'>(defaultTab);
   const [codeTab, setCodeTab] = useState<'html' | 'json'>('html');
@@ -37,23 +44,31 @@ export const PublishModal: React.FC<PublishModalProps> = ({
   const [copiedCname, setCopiedCname] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
 
+  // Status publikasi (Berbayar vs Draf)
+  const [isPublished, setIsPublished] = useState<boolean>(pageConfig.isPublished || false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [activationSuccess, setActivationSuccess] = useState<string | null>(null);
+
   // Form input domain terima beres
-  const tenantSlug = pageConfig.tenantName
-    ? pageConfig.tenantName.toLowerCase().replace(/[^a-z0-9]/g, '-')
-    : 'demo';
+  const tenantSlug = pageConfig.crmConfig?.tenantSlug || 
+    (pageConfig.tenantName ? pageConfig.tenantName.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'demo');
   const defaultDomainSuggestion = `${tenantSlug}.com`;
   const [requestedDomain, setRequestedDomain] = useState('');
-  const [customDomainInput, setCustomDomainInput] = useState('');
+  const [customDomainInput, setCustomDomainInput] = useState(pageConfig.customDomain || '');
   const [customDomainStatus, setCustomDomainStatus] = useState<'idle' | 'saved'>('idle');
 
   if (!isOpen) return null;
 
   const publicUrl = `https://studio.nexamos.cloud/p/${tenantSlug}`;
 
-  // WhatsApp Concierge URL (Order Terima Beres)
-  const targetDomain = requestedDomain.trim() || 'namadomainkamu.com';
-  const waOrderText = `Halo Tim NexaMOS, saya mau pesan *Layanan Domain Terima Beres* (Rp 300.000/thn) untuk landing page *${pageConfig.tenantName}*.\n\nDomain yang saya inginkan: *${targetDomain}*\n\nMohon dibantu proses pendaftaran dan setup SSL sampai tayang. Terima kasih!`;
-  const waOrderUrl = `https://wa.me/6285659024775?text=${encodeURIComponent(waOrderText)}`;
+  // WhatsApp Order URLs
+  const targetDomain = requestedDomain.trim() || defaultDomainSuggestion;
+  const waDomainOrderText = `Halo Tim NexaMOS, saya mau pesan *Layanan Domain .COM Terima Beres* (Rp 300.000/thn) untuk landing page *${pageConfig.tenantName}*.\n\nDomain yang saya inginkan: *${targetDomain}*\nSlug halaman: *${tenantSlug}*\n\nMohon dibantu proses pendaftaran dan setup SSL sampai tayang. Terima kasih!`;
+  const waDomainOrderUrl = `https://wa.me/6285659024775?text=${encodeURIComponent(waDomainOrderText)}`;
+
+  const cloudPriceText = billingCycle === 'yearly' ? 'Rp 990.000 / tahun (Diskon 2 Bulan)' : 'Rp 99.000 / bulan';
+  const waCloudOrderText = `Halo Tim NexaMOS, saya mau berlangganan *Layanan Publikasi Subdomain NexaMOS Web Studio* (${cloudPriceText}) untuk landing page *${pageConfig.tenantName}*.\n\nSlug halaman: *${tenantSlug}*\nURL Tujuan: ${publicUrl}\n\nMohon dibantu aktivasi publikasi landing page saya. Terima kasih!`;
+  const waCloudOrderUrl = `https://wa.me/6285659024775?text=${encodeURIComponent(waCloudOrderText)}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(publicUrl);
@@ -65,6 +80,32 @@ export const PublishModal: React.FC<PublishModalProps> = ({
     navigator.clipboard.writeText('domains.nexamos.cloud');
     setCopiedCname(true);
     setTimeout(() => setCopiedCname(false), 2000);
+  };
+
+  const handleActivatePublication = (planType: 'cloud' | 'custom_domain' = 'cloud') => {
+    const updated: PageConfig = {
+      ...pageConfig,
+      isPublished: true,
+      publishedAt: new Date().toISOString(),
+      publishPlan: planType,
+    };
+    setIsPublished(true);
+    setActivationSuccess('Publikasi Berhasil Diaktifkan! Halaman Anda kini resmi tayang online.');
+    if (onUpdatePageConfig) {
+      onUpdatePageConfig(updated);
+    }
+    setTimeout(() => setActivationSuccess(null), 4000);
+  };
+
+  const handleUnpublish = () => {
+    const updated: PageConfig = {
+      ...pageConfig,
+      isPublished: false,
+    };
+    setIsPublished(false);
+    if (onUpdatePageConfig) {
+      onUpdatePageConfig(updated);
+    }
   };
 
   // Generate pure HTML representation
@@ -105,18 +146,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
         <a href="https://wa.me/${headerBlock?.ctaWhatsapp || '6281234567890'}?text=Halo%20Admin" target="_blank" class="hidden sm:inline-flex px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition">
           ${headerBlock?.ctaText || 'Hubungi Kami'}
         </a>
-        <button onclick="document.getElementById('mobile-nav').classList.toggle('hidden')" class="md:hidden p-2 text-slate-300 hover:text-white rounded-lg bg-slate-900 border border-slate-800" aria-label="Toggle Menu">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
       </div>
-    </div>
-
-    <!-- Mobile Nav Drawer -->
-    <div id="mobile-nav" class="hidden md:hidden border-t border-slate-800 px-6 py-4 space-y-2 bg-slate-950">
-      ${(headerBlock?.navItems || []).map((n: any) => `<a href="${n.href}" class="block py-1.5 text-xs text-slate-300 hover:text-white" onclick="document.getElementById('mobile-nav').classList.add('hidden')">${n.label}</a>`).join('\n      ')}
-      <a href="https://wa.me/${headerBlock?.ctaWhatsapp || '6281234567890'}?text=Halo%20Admin" target="_blank" class="block w-full text-center mt-3 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow">
-        ${headerBlock?.ctaText || 'Hubungi Kami'}
-      </a>
     </div>
   </header>
 
@@ -135,7 +165,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
   </main>
 
   <footer class="mt-20 py-8 border-t border-slate-800 text-center text-xs text-slate-500">
-    © 2026 ${pageConfig.tenantName}. Powered by NexaMOS.
+    © 2026 ${pageConfig.tenantName}. Powered by NexaMOS Web Studio.
   </footer>
 </body>
 </html>`;
@@ -172,20 +202,34 @@ export const PublishModal: React.FC<PublishModalProps> = ({
         {/* Header Dialog */}
         <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 shrink-0">
-              <Rocket className="w-5 h-5 text-indigo-100" />
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0 ${
+              isPublished 
+                ? 'bg-linear-to-tr from-emerald-600 to-teal-600 shadow-emerald-500/20' 
+                : 'bg-linear-to-tr from-indigo-600 to-violet-600 shadow-indigo-500/20'
+            }`}>
+              {isPublished ? <CheckCircle2 className="w-5 h-5 text-emerald-100" /> : <Rocket className="w-5 h-5 text-indigo-100" />}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  Publikasikan Halaman
+                  Layanan Publikasi NexaMOS Web Studio
                 </h3>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">
-                  Siap Tayang
-                </span>
+                {isPublished ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Online & Aktif
+                  </span>
+                ) : (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20 flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    Perlu Layanan Publikasi
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Bagikan tautan langsung atau pasang domain kustom profesional untuk brand Anda.
+                {isPublished 
+                  ? 'Halaman Anda resmi mengudara dan siap menangkap leads pendaftar ke CRM.'
+                  : 'Desain kanvas siap. Aktifkan layanan publikasi untuk menayangkan landing page ke publik.'}
               </p>
             </div>
           </div>
@@ -202,24 +246,26 @@ export const PublishModal: React.FC<PublishModalProps> = ({
         <div className="flex items-center gap-1 px-4 sm:px-5 pt-3 border-b border-slate-800 bg-slate-950/40">
           <button
             onClick={() => setActiveTab('publish')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${activeTab === 'publish'
-              ? 'border-indigo-500 text-white bg-slate-800/70'
-              : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
-              }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${
+              activeTab === 'publish'
+                ? 'border-indigo-500 text-white bg-slate-800/70'
+                : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
+            }`}
           >
             <Rocket className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Tautan Publik</span>
+            <span>Tautan Publik {isPublished ? '(Aktif)' : '(Berbayar)'}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('domain')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${activeTab === 'domain'
-              ? 'border-indigo-500 text-white bg-slate-800/70'
-              : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
-              }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${
+              activeTab === 'domain'
+                ? 'border-indigo-500 text-white bg-slate-800/70'
+                : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
+            }`}
           >
             <Globe className="w-3.5 h-3.5 text-violet-400" />
-            <span>Domain Kustom</span>
+            <span>Domain Kustom .COM</span>
             <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">
               Add-on
             </span>
@@ -227,10 +273,11 @@ export const PublishModal: React.FC<PublishModalProps> = ({
 
           <button
             onClick={() => setActiveTab('code')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${activeTab === 'code'
-              ? 'border-indigo-500 text-white bg-slate-800/70'
-              : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
-              }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-t-lg text-xs font-semibold border-b-2 transition ${
+              activeTab === 'code'
+                ? 'border-indigo-500 text-white bg-slate-800/70'
+                : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30'
+            }`}
           >
             <Code className="w-3.5 h-3.5 text-slate-400" />
             <span>Opsi Pengembang</span>
@@ -239,89 +286,270 @@ export const PublishModal: React.FC<PublishModalProps> = ({
 
         {/* Body Content per Active Tab */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-          {/* TAB 1: TAUTAN PUBLIK (DEFAULT) */}
+          {/* TAB 1: TAUTAN PUBLIK */}
           {activeTab === 'publish' && (
             <div className="space-y-5">
-              {/* Live URL Card */}
-              <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-inner">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-slate-300">
-                    Tautan Cepat Resmi NexaMOS (Gratis & Aktif Langsung)
-                  </span>
-                  <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    Online & Responsif
-                  </span>
+              {/* Alert Notifikasi Sukses Aktivasi */}
+              {activationSuccess && (
+                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{activationSuccess}</span>
                 </div>
+              )}
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-3">
-                  <div className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-indigo-300 truncate select-all flex items-center">
-                    {publicUrl}
+              {/* KONDISI 1: SUDAH BERLANGGANAN & PUBLIKASI AKTIF */}
+              {isPublished ? (
+                <div className="space-y-4">
+                  {/* Active Live URL Card */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-inner">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-slate-300">
+                        Tautan Publik Resmi NexaMOS Cloud (Aktif & Online)
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        Live di Internet
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-3">
+                      <div className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-emerald-300 truncate select-all flex items-center">
+                        {publicUrl}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={handleCopyLink}
+                          className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+                        >
+                          {copiedLink ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-emerald-400">Tersalin!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Salin Tautan</span>
+                            </>
+                          )}
+                        </button>
+                        <a
+                          href={publicUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Buka Halaman</span>
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+
+                  {/* Active Benefits Status */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h5 className="text-xs font-bold text-white">Otomatis Terhubung CRM & WhatsApp</h5>
+                        <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                          Setiap submit formulir pendaftaran langsung terkirim ke WhatsApp CS dan otomatis dicatat ke database NexaMOS CRM.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+                        <ShieldCheck className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h5 className="text-xs font-bold text-white">Cloudflare Edge & UU PDP</h5>
+                        <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                          Hosting ultra cepat, sertifikat SSL HTTPS otomatis, proteksi anti-spam, dan klausul hukum persetujuan privasi data.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Unpublish Control */}
+                  <div className="pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800">
+                    <span>Butuh revisi tanpa dilihat publik?</span>
                     <button
-                      onClick={handleCopyLink}
-                      className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+                      onClick={handleUnpublish}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-rose-500/10 text-slate-300 hover:text-rose-400 border border-slate-700 hover:border-rose-500/30 transition"
                     >
-                      {copiedLink ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400">Tersalin!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Salin Tautan</span>
-                        </>
-                      )}
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Kembalikan ke Status Draf</span>
                     </button>
-                    <a
-                      href={publicUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition"
+                  </div>
+                </div>
+              ) : (
+                /* KONDISI 2: BELUM BERLANGGANAN (PAYWALL / GATED PUBLISHING) */
+                <div className="space-y-5">
+                  {/* Notice Banner */}
+                  <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-xs text-slate-300 leading-relaxed space-y-2">
+                    <div className="flex items-center gap-2 font-bold text-white text-sm">
+                      <Lock className="w-4 h-4 text-indigo-400" />
+                      <span>Layanan Publikasi NexaMOS Web Studio Berbayar</span>
+                    </div>
+                    <p className="text-slate-300">
+                      Anda bebas mendesain kanvas dan melihat pratinjau live secara gratis. Untuk <strong className="text-white">menayangkan halaman ini ke internet</strong> agar calon pendaftar bisa membuka tautan dan mengisi formulir yang langsung sinkron ke CRM & WhatsApp, silakan pilih paket publikasi resmi berikut:
+                    </p>
+                  </div>
+
+                  {/* Cycle Switcher */}
+                  <div className="flex items-center justify-center gap-2 p-1 bg-slate-950 border border-slate-800 rounded-xl max-w-xs mx-auto">
+                    <button
+                      onClick={() => setBillingCycle('monthly')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition ${
+                        billingCycle === 'monthly'
+                          ? 'bg-indigo-600 text-white shadow'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Buka Halaman</span>
-                    </a>
+                      Tagihan Bulanan
+                    </button>
+                    <button
+                      onClick={() => setBillingCycle('yearly')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition ${
+                        billingCycle === 'yearly'
+                          ? 'bg-indigo-600 text-white shadow'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <span>Tahunan</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                        -2 Bulan
+                      </span>
+                    </button>
                   </div>
-                </div>
-              </div>
 
-              {/* Automatic Features Included */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-bold text-white">Otomatis Terhubung WhatsApp & CRM</h5>
-                    <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                      Setiap formulir yang diisi pendaftar langsung masuk ke WhatsApp CS dan tercatat di database NexaMOS CRM.
-                    </p>
-                  </div>
-                </div>
+                  {/* Grid 2 Opsi Publikasi Berbayar */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Paket 1: Subdomain NexaMOS Cloud */}
+                    <div className="rounded-xl bg-slate-950 border-2 border-indigo-500/40 p-4.5 flex flex-col justify-between shadow-xl relative">
+                      <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-bl-lg">
+                        Populer
+                      </div>
 
-                <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-bold text-white">Kepatuhan UU PDP & Anti-Spam</h5>
-                    <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                      Lengkap dengan klausul persetujuan privasi data resmi untuk keamanan hukum institusi Anda.
-                    </p>
-                  </div>
-                </div>
-              </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Rocket className="w-4 h-4 text-indigo-400" />
+                          <h4 className="text-sm font-bold text-white">Paket Publikasi Cloud</h4>
+                        </div>
+                        <div className="mb-3">
+                          <div className="text-lg font-black text-white">
+                            {billingCycle === 'yearly' ? 'Rp 990.000' : 'Rp 99.000'}
+                            <span className="text-xs font-normal text-slate-400">
+                              {billingCycle === 'yearly' ? ' / tahun' : ' / bulan'}
+                            </span>
+                          </div>
+                          <div className="text-xs text-indigo-400 font-mono mt-0.5 truncate">
+                            studio.nexamos.cloud/p/{tenantSlug}
+                          </div>
+                        </div>
 
-              {/* Actionable Tips */}
-              <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-4 text-xs text-slate-300 leading-relaxed flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-white">Langkah Selanjutnya:</strong> Tempel tautan ini di Bio Instagram & TikTok Anda, atau jadikan tautan tujuan (Landing Page URL) saat memasang iklan di Meta Ads (Facebook & Instagram) dan Google Ads.
+                        <ul className="space-y-2 text-xs text-slate-300 mb-4">
+                          <li className="flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Hosting Cloudflare Global 100% Uptime</span>
+                          </li>
+                          <li className="flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>SSL HTTPS Otomatis</span>
+                          </li>
+                          <li className="flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Unlimited Leads CRM & WhatsApp Sync</span>
+                          </li>
+                          <li className="flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Pelacakan Meta CAPI & Google Ads</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <a
+                        href={waCloudOrderUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/20 transition active:scale-95"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Pesan via WhatsApp NexaMOS</span>
+                      </a>
+                    </div>
+
+                    {/* Paket 2: Domain .COM Terima Beres */}
+                    <div className="rounded-xl bg-slate-950 border border-slate-800 hover:border-violet-500/40 p-4.5 flex flex-col justify-between shadow-xl">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Globe className="w-4 h-4 text-violet-400" />
+                          <h4 className="text-sm font-bold text-white">Domain .COM Terima Beres</h4>
+                        </div>
+                        <div className="mb-3">
+                          <div className="text-lg font-black text-white">
+                            Rp 300.000
+                            <span className="text-xs font-normal text-slate-400"> / tahun</span>
+                          </div>
+                          <div className="text-xs text-violet-400 font-mono mt-0.5 truncate">
+                            {defaultDomainSuggestion}
+                          </div>
+                        </div>
+
+                        <ul className="space-y-2 text-xs text-slate-300 mb-4">
+                          <li className="flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Domain Resmi .COM Atas Nama Anda</span>
+                          </li>
+                          <li className="flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Setup DNS & SSL 100% Terima Beres</span>
+                          </li>
+                          <li className="flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Tayang Kilat Dalam 1 Jam Kerja</span>
+                          </li>
+                          <li className="flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Termasuk Seluruh Fitur Paket Cloud</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <a
+                        href={waDomainOrderUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/20 transition active:scale-95"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Pesan Domain .COM via WhatsApp</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Verifikasi Lisensi / Sudah Bayar Box */}
+                  <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <Zap className="w-4 h-4 text-amber-400 shrink-0" />
+                      <div>
+                        <div className="font-semibold text-white">Sudah Berlangganan / Miliki Akses Organisasi?</div>
+                        <div className="text-slate-400 text-xs">Aktifkan publikasi instan halaman ini sekarang.</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleActivatePublication('cloud')}
+                      className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold transition shrink-0 flex items-center gap-1.5"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Aktifkan Publikasi Sekarang</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -359,12 +587,12 @@ export const PublishModal: React.FC<PublishModalProps> = ({
                           type="text"
                           value={requestedDomain}
                           onChange={(e) => setRequestedDomain(e.target.value)}
-                          placeholder="Contoh: namadomainkamu.com"
+                          placeholder={`Contoh: ${defaultDomainSuggestion}`}
                           className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono shadow-inner"
                         />
                       </div>
                       <a
-                        href={waOrderUrl}
+                        href={waDomainOrderUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 transition active:scale-95 shrink-0"
@@ -449,12 +677,20 @@ export const PublishModal: React.FC<PublishModalProps> = ({
                           setCustomDomainInput(e.target.value);
                           setCustomDomainStatus('idle');
                         }}
-                        placeholder="Masukkan domain Anda (misal: namadomainkamu.com)"
+                        placeholder={`Masukkan domain Anda (misal: ${defaultDomainSuggestion})`}
                         className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-slate-600 font-mono"
                       />
                       <button
                         onClick={() => {
-                          if (customDomainInput.trim()) setCustomDomainStatus('saved');
+                          if (customDomainInput.trim()) {
+                            setCustomDomainStatus('saved');
+                            if (onUpdatePageConfig) {
+                              onUpdatePageConfig({
+                                ...pageConfig,
+                                customDomain: customDomainInput.trim(),
+                              });
+                            }
+                          }
                         }}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shrink-0"
                       >
@@ -467,26 +703,28 @@ export const PublishModal: React.FC<PublishModalProps> = ({
             </div>
           )}
 
-          {/* TAB 3: OPSI PENGEMBANG (KODE MENTAH HTML / JSON) */}
+          {/* TAB 3: OPSI PENGEMBANG */}
           {activeTab === 'code' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-slate-800">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setCodeTab('html')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${codeTab === 'html'
-                      ? 'bg-slate-800 text-white border border-slate-700'
-                      : 'text-slate-400 hover:text-white'
-                      }`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                      codeTab === 'html'
+                        ? 'bg-slate-800 text-white border border-slate-700'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
                   >
                     Standalone HTML
                   </button>
                   <button
                     onClick={() => setCodeTab('json')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${codeTab === 'json'
-                      ? 'bg-slate-800 text-white border border-slate-700'
-                      : 'text-slate-400 hover:text-white'
-                      }`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                      codeTab === 'json'
+                        ? 'bg-slate-800 text-white border border-slate-700'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
                   >
                     Schema JSON
                   </button>
@@ -524,4 +762,3 @@ export const PublishModal: React.FC<PublishModalProps> = ({
     </div>
   );
 };
-

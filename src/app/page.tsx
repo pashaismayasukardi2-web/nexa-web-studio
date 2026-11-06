@@ -248,6 +248,7 @@ export default function WebStudioPage() {
         tenantType={pageConfig.tenantType}
         setTenantType={(t: TenantType) => setPageConfig((prev) => ({ ...prev, tenantType: t }))}
         pageTitle={pageConfig.title}
+        isPublished={pageConfig.isPublished || false}
         onPublish={() => setIsPublishModalOpen(true)}
         onAuthRequired={() => handleAuthRequired('mempublikasikan landing page')}
       />
@@ -302,6 +303,7 @@ export default function WebStudioPage() {
         pageConfig={pageConfig}
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
+        onUpdatePageConfig={(updated) => setPageConfig(updated)}
       />
 
       {/* Auth Guard Modal */}

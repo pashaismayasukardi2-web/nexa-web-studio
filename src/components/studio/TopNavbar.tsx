@@ -17,7 +17,9 @@ import {
   Building2,
   ChevronDown,
   Sparkles,
-  Rocket
+  Rocket,
+  Compass,
+  ExternalLink
 } from 'lucide-react';
 import { DeviceView, StudioTheme, TenantType } from '../../types/builder';
 import { useAuth } from '../../context/AuthContext';
@@ -32,6 +34,7 @@ interface TopNavbarProps {
   tenantType: TenantType;
   setTenantType: (t: TenantType) => void;
   pageTitle: string;
+  isPublished?: boolean;
   onOpenCodeModal?: () => void;
   onExportHtml?: () => void;
   onPublish: () => void;
@@ -48,6 +51,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   tenantType,
   setTenantType,
   pageTitle,
+  isPublished = false,
   onOpenCodeModal,
   onExportHtml,
   onPublish,
@@ -82,6 +86,16 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30">
                 Web Studio
               </span>
+              {isPublished ? (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live
+                </span>
+              ) : (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20">
+                  Draf
+                </span>
+              )}
             </div>
             <div className="text-xs text-slate-400 truncate max-w-xs">
               {pageTitle}
@@ -232,10 +246,16 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               (onPublish || onExportHtml)?.();
             }}
             aria-label="Publikasikan & Kelola Domain"
-            className="h-9 px-3.5 rounded-lg flex items-center gap-1.5 text-xs font-semibold bg-linear-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/30 hover:brightness-110 transition active:scale-95"
+            className={`h-9 px-3.5 rounded-lg flex items-center gap-1.5 text-xs font-semibold shadow-lg transition active:scale-95 ${
+              isPublished
+                ? 'bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-600/30 hover:brightness-110'
+                : 'bg-linear-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-indigo-600/30 hover:brightness-110'
+            }`}
           >
             <Rocket className="w-3.5 h-3.5 text-indigo-100" />
-            <span className="hidden sm:inline">Publikasikan</span>
+            <span className="hidden sm:inline">
+              {isPublished ? 'Status Publikasi (Live)' : 'Publikasikan'}
+            </span>
           </button>
           <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-md shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
             Publikasikan & Kelola Domain
@@ -299,6 +319,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <span>Web Studio: Aktif</span>
                   </div>
                 </div>
+
+                <a
+                  href="https://workspace.nexamos.cloud"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition mb-1"
+                >
+                  <div className="flex items-center gap-2">
+                    <Compass className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                    <span>NexaMOS Workspace</span>
+                  </div>
+                  <ExternalLink className="w-3 h-3 text-slate-500 shrink-0" />
+                </a>
 
                 <button
                   onClick={() => {
