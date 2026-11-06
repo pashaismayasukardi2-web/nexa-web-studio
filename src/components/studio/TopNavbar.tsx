@@ -321,7 +321,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 </div>
 
                 <a
-                  href="https://workspace.nexamos.cloud"
+                  href="https://nexamos.cloud/workspace"
                   className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition mb-1"
                 >
                   <div className="flex items-center gap-2">
