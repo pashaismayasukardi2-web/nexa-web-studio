@@ -42,7 +42,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
     ? pageConfig.tenantName.toLowerCase().replace(/[^a-z0-9]/g, '-')
     : 'demo';
   const defaultDomainSuggestion = `${tenantSlug}.com`;
-  const [requestedDomain, setRequestedDomain] = useState(defaultDomainSuggestion);
+  const [requestedDomain, setRequestedDomain] = useState('');
   const [customDomainInput, setCustomDomainInput] = useState('');
   const [customDomainStatus, setCustomDomainStatus] = useState<'idle' | 'saved'>('idle');
 
@@ -51,7 +51,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
   const publicUrl = `https://studio.nexamos.cloud/p/${tenantSlug}`;
 
   // WhatsApp Concierge URL (Order Terima Beres)
-  const targetDomain = requestedDomain.trim() || defaultDomainSuggestion;
+  const targetDomain = requestedDomain.trim() || 'namadomainkamu.com';
   const waOrderText = `Halo Tim NexaMOS, saya mau pesan *Layanan Domain Terima Beres* (Rp 300.000/thn) untuk landing page *${pageConfig.tenantName}*.\n\nDomain yang saya inginkan: *${targetDomain}*\n\nMohon dibantu proses pendaftaran dan setup SSL sampai tayang. Terima kasih!`;
   const waOrderUrl = `https://wa.me/6285659024775?text=${encodeURIComponent(waOrderText)}`;
 
