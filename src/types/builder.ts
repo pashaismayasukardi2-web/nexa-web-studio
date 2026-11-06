@@ -105,6 +105,11 @@ export interface LeadFormBlock extends BaseBlock {
   showSchoolField: boolean;
   showProgramField: boolean;
   successMessage: string;
+  // Native CRM & CAPI Tracking Options
+  syncToNexaCRM?: boolean;
+  tenantSlug?: string;
+  metaPixelId?: string;
+  autoCaptureUtm?: boolean;
 }
 
 export interface FaqBlock extends BaseBlock {
@@ -154,5 +159,15 @@ export interface PageConfig {
   theme: StudioTheme;
   metaDescription: string;
   blocks: BlockItem[];
+  crmConfig?: {
+    tenantSlug?: string;
+    autoSync?: boolean;
+    crmApiUrl?: string;
+  };
+  tracking?: {
+    metaPixelId?: string;
+    googleAnalyticsId?: string;
+    autoCaptureUtm?: boolean;
+  };
 }
 

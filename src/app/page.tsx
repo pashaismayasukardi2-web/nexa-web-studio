@@ -8,6 +8,7 @@ import { SidebarBlockPicker } from '../components/studio/SidebarBlockPicker';
 import { CanvasArea } from '../components/studio/CanvasArea';
 import { InspectorPanel } from '../components/studio/InspectorPanel';
 import { PublishModal } from '../components/studio/PublishModal';
+import { AuthRequiredModal } from '../components/studio/AuthRequiredModal';
 
 export default function WebStudioPage() {
   const [pageConfig, setPageConfig] = useState<PageConfig>(initialPageConfig);
@@ -15,6 +16,13 @@ export default function WebStudioPage() {
   const [device, setDevice] = useState<DeviceView>('desktop');
   const [isLivePreview, setIsLivePreview] = useState<boolean>(false);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [authActionText, setAuthActionText] = useState<string>('mengedit komponen dan mengunggah media');
+
+  const handleAuthRequired = (text?: string) => {
+    if (text) setAuthActionText(text);
+    setIsAuthModalOpen(true);
+  };
 
   // Selected Block reference
   const selectedBlock = pageConfig.blocks.find((b) => b.id === selectedBlockId) || null;
@@ -193,6 +201,30 @@ export default function WebStudioPage() {
     });
   };
 
+  const handleReorderBlocks = (newBlocks: BlockItem[]) => {
+    setPageConfig((prev) => ({
+      ...prev,
+      blocks: newBlocks,
+    }));
+  };
+
+  const handleDuplicateBlock = (id: string) => {
+    setPageConfig((prev) => {
+      const idx = prev.blocks.findIndex((b) => b.id === id);
+      if (idx === -1) return prev;
+      const target = prev.blocks[idx];
+      const newId = `blk_${target.type}_${Date.now()}`;
+      const duplicated: BlockItem = {
+        ...JSON.parse(JSON.stringify(target)),
+        id: newId,
+        title: `${target.title || target.type} (Salinan)`,
+      };
+      const newBlocks = [...prev.blocks];
+      newBlocks.splice(idx + 1, 0, duplicated);
+      return { ...prev, blocks: newBlocks };
+    });
+  };
+
   const handleDeleteBlock = (id: string) => {
     setPageConfig((prev) => {
       const remaining = prev.blocks.filter((b) => b.id !== id);
@@ -217,6 +249,7 @@ export default function WebStudioPage() {
         setTenantType={(t: TenantType) => setPageConfig((prev) => ({ ...prev, tenantType: t }))}
         pageTitle={pageConfig.title}
         onPublish={() => setIsPublishModalOpen(true)}
+        onAuthRequired={() => handleAuthRequired('mempublikasikan landing page')}
       />
 
       {/* Main Studio Body: Sidebar | Canvas | Inspector */}
@@ -230,6 +263,9 @@ export default function WebStudioPage() {
             onAddBlock={handleAddBlock}
             onMoveBlock={handleMoveBlock}
             onDeleteBlock={handleDeleteBlock}
+            onReorderBlocks={handleReorderBlocks}
+            onDuplicateBlock={handleDuplicateBlock}
+            onAuthRequired={() => handleAuthRequired('menyusun dan menambah bagian halaman')}
           />
         )}
 
@@ -238,10 +274,16 @@ export default function WebStudioPage() {
           blocks={pageConfig.blocks}
           selectedBlockId={selectedBlockId}
           onSelectBlock={setSelectedBlockId}
+          onUpdateBlock={handleUpdateBlock}
+          onMoveBlock={handleMoveBlock}
+          onDeleteBlock={handleDeleteBlock}
+          onDuplicateBlock={handleDuplicateBlock}
           device={device}
           isLivePreview={isLivePreview}
           theme={pageConfig.theme}
           tenantType={pageConfig.tenantType}
+          pageConfig={pageConfig}
+          onAuthRequired={() => handleAuthRequired('mengedit teks langsung pada kanvas')}
         />
 
         {/* Right: Block Inspector & Settings */}
@@ -250,6 +292,7 @@ export default function WebStudioPage() {
             selectedBlock={selectedBlock}
             onUpdateBlock={handleUpdateBlock}
             onClose={() => setSelectedBlockId(null)}
+            onAuthRequired={() => handleAuthRequired('mengatur konfigurasi bagian halaman')}
           />
         )}
       </div>
@@ -259,6 +302,13 @@ export default function WebStudioPage() {
         pageConfig={pageConfig}
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
+      />
+
+      {/* Auth Guard Modal */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        actionText={authActionText}
       />
     </div>
   );

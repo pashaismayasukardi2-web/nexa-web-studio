@@ -109,7 +109,10 @@ export const initialPageConfig: PageConfig = {
       whatsappDirectNumber: '6281234567890',
       showSchoolField: true,
       showProgramField: true,
-      successMessage: 'Terima kasih! Konselor resmi kami akan segera menghubungi nomor WhatsApp Anda dalam waktu 1x24 jam.'
+      successMessage: 'Terima kasih! Konselor resmi kami akan segera menghubungi nomor WhatsApp Anda dalam waktu 1x24 jam.',
+      syncToNexaCRM: true,
+      tenantSlug: 'crm-demo',
+      autoCaptureUtm: true,
     },
     {
       id: 'blk_testimonials_1',
@@ -184,6 +187,16 @@ export const initialPageConfig: PageConfig = {
       whatsappNumber: '6281234567890',
       copyrightText: '© 2026 LPK Cakrawala Global. Powered by NexaMOS Web Studio.'
     }
-  ]
+  ],
+  crmConfig: {
+    tenantSlug: 'crm-demo',
+    autoSync: true,
+    crmApiUrl: 'https://crm.nexamos.cloud/api/public',
+  },
+  tracking: {
+    autoCaptureUtm: true,
+    metaPixelId: '',
+    googleAnalyticsId: '',
+  },
 };
 

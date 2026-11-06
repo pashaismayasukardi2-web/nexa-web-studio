@@ -31,6 +31,7 @@ export default async function PublicTenantPage({ params }: PublicPageProps) {
       theme={initialPageConfig.theme}
       tenantType={initialPageConfig.tenantType}
       isPublicPage={true}
+      pageConfig={initialPageConfig}
     />
   );
 }

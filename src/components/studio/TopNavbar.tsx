@@ -35,6 +35,7 @@ interface TopNavbarProps {
   onOpenCodeModal?: () => void;
   onExportHtml?: () => void;
   onPublish: () => void;
+  onAuthRequired?: () => void;
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -50,6 +51,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   onOpenCodeModal,
   onExportHtml,
   onPublish,
+  onAuthRequired,
 }) => {
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -218,7 +220,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         {/* Publish Button */}
         <div className="relative group">
           <button
-            onClick={onPublish || onExportHtml}
+            onClick={() => {
+              if (!isAuthenticated) {
+                if (onAuthRequired) {
+                  onAuthRequired();
+                } else {
+                  login();
+                }
+                return;
+              }
+              (onPublish || onExportHtml)?.();
+            }}
             aria-label="Publikasikan & Kelola Domain"
             className="h-9 px-3.5 rounded-lg flex items-center gap-1.5 text-xs font-semibold bg-linear-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/30 hover:brightness-110 transition active:scale-95"
           >
