@@ -19,9 +19,9 @@ import { BlockItem, DeviceView, StudioTheme, TenantType } from '../../types/buil
 interface CanvasAreaProps {
   blocks: BlockItem[];
   selectedBlockId: string | null;
-  onSelectBlock: (id: string) => void;
-  device: DeviceView;
-  isLivePreview: boolean;
+  onSelectBlock?: (id: string) => void;
+  device?: DeviceView;
+  isLivePreview?: boolean;
   theme: StudioTheme;
   tenantType: TenantType;
   isPublicPage?: boolean;
@@ -31,8 +31,8 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   blocks,
   selectedBlockId,
   onSelectBlock,
-  device,
-  isLivePreview,
+  device = 'desktop',
+  isLivePreview = false,
   theme,
   tenantType,
   isPublicPage = false,
@@ -158,7 +158,7 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
               ref={(el) => {
                 blockRefs.current[blk.id] = el;
               }}
-              onClick={() => !isLivePreview && onSelectBlock(blk.id)}
+              onClick={() => !isLivePreview && onSelectBlock?.(blk.id)}
               className={`relative transition ${
                 !isLivePreview ? 'cursor-pointer hover:ring-2 hover:ring-indigo-500/50' : ''
               } ${isSelected ? 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-slate-950' : ''}`}

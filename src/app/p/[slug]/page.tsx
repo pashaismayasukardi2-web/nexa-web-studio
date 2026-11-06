@@ -26,7 +26,6 @@ export default async function PublicTenantPage({ params }: PublicPageProps) {
     <CanvasArea
       blocks={initialPageConfig.blocks}
       selectedBlockId={null}
-      onSelectBlock={() => {}}
       device="desktop"
       isLivePreview={true}
       theme={initialPageConfig.theme}
