@@ -76,13 +76,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     <header className="h-16 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md px-4 flex items-center justify-between z-30 sticky top-0">
       {/* Brand & Project Name */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-indigo-600 via-violet-600 to-fuchsia-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
-            N
-          </div>
+        <div className="flex items-center gap-2.5">
+          <img
+            src="/logo-nexa-01.png"
+            alt="NexaMOS"
+            className="h-9 w-auto object-contain shrink-0"
+          />
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-white tracking-tight">NexaMOS</span>
               <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30">
                 Web Studio
               </span>
