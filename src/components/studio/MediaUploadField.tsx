@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getSession } from '../../lib/auth';
+import { compressImage, formatBytes } from '../../lib/imageCompression';
 
 interface MediaUploadFieldProps {
   label: string;
@@ -56,6 +57,11 @@ export const MediaUploadField: React.FC<MediaUploadFieldProps> = ({
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [dragOver, setDragOver] = useState<boolean>(false);
   const [urlInput, setUrlInput] = useState<string>(value);
+  const [compressionInfo, setCompressionInfo] = useState<{
+    originalSize: number;
+    compressedSize: number;
+    savedPercentage: number;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const requireAuth = () => {
@@ -85,16 +91,36 @@ export const MediaUploadField: React.FC<MediaUploadFieldProps> = ({
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file maksimal 5MB.');
-      return;
-    }
-
     setIsUploading(true);
+    setCompressionInfo(null);
 
     try {
+      // 🚀 Auto-kompresi gambar client-side sebelum diunggah
+      const compressionResult = await compressImage(file, {
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 0.82,
+        targetFormat: 'image/webp',
+      });
+
+      const fileToUpload = compressionResult.file;
+
+      if (fileToUpload.size > 5 * 1024 * 1024) {
+        alert('Ukuran file setelah kompresi masih melebihi batas 5MB.');
+        setIsUploading(false);
+        return;
+      }
+
+      if (compressionResult.wasCompressed) {
+        setCompressionInfo({
+          originalSize: compressionResult.originalSize,
+          compressedSize: compressionResult.compressedSize,
+          savedPercentage: compressionResult.savedPercentage,
+        });
+      }
+
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', fileToUpload);
 
       const res = await fetch('/api/upload', {
         method: 'POST',
@@ -271,7 +297,8 @@ export const MediaUploadField: React.FC<MediaUploadFieldProps> = ({
             {isUploading ? (
               <div className="flex flex-col items-center gap-1.5 py-2">
                 <RefreshCw className="w-5 h-5 text-indigo-400 animate-spin" />
-                <span className="text-xs text-slate-300 font-medium">Mengunggah gambar...</span>
+                <span className="text-xs text-slate-300 font-medium">Mengompresi & mengunggah gambar...</span>
+                <span className="text-xs text-slate-500">Auto-kompresi aktif</span>
               </div>
             ) : (
               <>
@@ -283,13 +310,23 @@ export const MediaUploadField: React.FC<MediaUploadFieldProps> = ({
                     Klik untuk pilih atau seret gambar ke sini
                   </p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    PNG, JPG, WebP, atau SVG (maksimal 5MB)
+                    PNG, JPG, WebP, SVG (Auto-kompresi aktif, maks. 5MB)
                   </p>
                 </div>
               </>
             )}
           </div>
         )
+      )}
+
+      {/* Auto Compression Success Feedback */}
+      {compressionInfo && (
+        <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg animate-in fade-in duration-150">
+          <Sparkles className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+          <span className="truncate">
+            Auto-kompresi: {formatBytes(compressionInfo.originalSize)} → {formatBytes(compressionInfo.compressedSize)} (Hemat {compressionInfo.savedPercentage}%)
+          </span>
+        </div>
       )}
 
       {/* TAB 2: PRESET GALLERY */}

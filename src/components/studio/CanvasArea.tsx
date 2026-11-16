@@ -21,7 +21,8 @@ import {
   Sparkles,
   Loader2,
   Layers,
-  Lock
+  Lock,
+  Upload
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -30,6 +31,7 @@ import {
   StudioTheme, 
   TenantType, 
   PageConfig,
+  HeaderBlock,
   ProgramsBlock,
   StatsBlock,
   FeaturesBlock,
@@ -37,6 +39,7 @@ import {
   FaqBlock
 } from '../../types/builder';
 import { InlineEditableText } from './InlineEditableText';
+import { TenantLogoModal } from './TenantLogoModal';
 import { 
   captureUtmParameters, 
   initMetaPixel, 
@@ -81,6 +84,8 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [formData, setFormData] = useState({ name: '', phone: '', school: '', program: '' });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState<boolean>(false);
+  const [editingHeaderBlock, setEditingHeaderBlock] = useState<HeaderBlock | null>(null);
   const [isSubmittingLead, setIsSubmittingLead] = useState<boolean>(false);
   const [leadSubmitResult, setLeadSubmitResult] = useState<{
     success: boolean;
@@ -386,101 +391,204 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
                       isMobile ? 'px-4 py-3' : isTablet ? 'px-6 py-3.5' : 'px-8 py-4 max-w-6xl'
                     }`}
                   >
-                    {/* Brand / Logo */}
-                    <div className="flex items-center gap-3">
-                      {blk.logoUrl ? (
-                        <img
-                          src={blk.logoUrl}
-                          alt={blk.brandName}
-                          className="h-8 max-w-32 object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-lg bg-linear-to-tr from-indigo-600 to-violet-600 flex items-center justify-center font-black text-white text-xs shadow-md shadow-indigo-600/30">
-                          {blk.brandName ? blk.brandName.charAt(0).toUpperCase() : 'N'}
-                        </div>
-                      )}
-                      <div className="flex flex-col">
-                        <InlineEditableText
-                          value={blk.brandName || 'Nama Brand'}
-                          onChange={(val) => onUpdateBlock?.({ ...blk, brandName: val })}
-                          disabled={isEditingDisabled} onAuthRequired={inlineAuthCallback}
-                          as="span"
-                          className="font-bold text-white text-sm tracking-tight truncate max-w-44 sm:max-w-xs"
-                        />
-                        {blk.tagline && (
-                          <InlineEditableText
-                            value={blk.tagline}
-                            onChange={(val) => onUpdateBlock?.({ ...blk, tagline: val })}
-                            disabled={isEditingDisabled} onAuthRequired={inlineAuthCallback}
-                            as="span"
-                            className="text-xs text-slate-400 truncate max-w-44 sm:max-w-xs hidden sm:block"
-                          />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Desktop & Tablet Navigation Menu */}
-                    {!isMobile && (
-                      <nav className="flex items-center gap-6 text-xs font-medium text-slate-300">
-                        {(blk.navItems || []).map((nav) => (
-                          <a
-                            key={nav.id}
-                            href={nav.href}
-                            className="hover:text-white transition hover:underline underline-offset-4"
-                            onClick={(e) => {
-                              if (!isLivePreview) {
-                                e.preventDefault();
-                              }
-                            }}
-                          >
-                            {nav.label}
-                          </a>
-                        ))}
-                      </nav>
-                    )}
-
-                    {/* Right Action: CTA Button on Desktop, Hamburger Button on Mobile */}
-                    <div className="flex items-center gap-2">
-                      {!isMobile ? (
-                        <a
-                          href={`https://wa.me/${blk.ctaWhatsapp}?text=Halo%20Admin%2C%20saya%20ingin%20konsultasi`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-xs ${themeCls.btnPrimary}`}
-                        >
-                          <MessageCircle className="w-3.5 h-3.5" />
-                          <InlineEditableText
-                            value={blk.ctaText}
-                            onChange={(val) => onUpdateBlock?.({ ...blk, ctaText: val })}
-                            disabled={isEditingDisabled} onAuthRequired={inlineAuthCallback}
-                            as="span"
-                          />
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsMobileMenuOpen(!isMobileMenuOpen);
-                          }}
-                          className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition"
-                          aria-label="Toggle Menu Navigasi"
-                        >
-                          {isMobileMenuOpen ? (
-                            <X className="w-5 h-5" />
+                    {isMobile ? (
+                      /* KHUSUS UI MOBILE: 2 Kolom (Kiri: Upload/Logo Tenant, Kanan: Menu Hamburger Ikon) */
+                      <>
+                        {/* KOLOM KIRI: Upload Logo Tenant / Logo Aktif */}
+                        <div className="flex items-center min-w-0">
+                          {!isEditingDisabled ? (
+                            blk.logoUrl ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingHeaderBlock(blk as HeaderBlock);
+                                  setIsLogoModalOpen(true);
+                                }}
+                                className="group flex items-center gap-2 p-1 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 transition max-w-56 text-left"
+                                title="Klik untuk ubah logo tenant"
+                              >
+                                <img
+                                  src={blk.logoUrl}
+                                  alt={blk.brandName || 'Logo Tenant'}
+                                  className="h-8 max-w-32 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 opacity-80 group-hover:opacity-100 transition shrink-0 flex items-center gap-1 font-medium">
+                                  <Upload className="w-3 h-3" />
+                                  <span>Ubah</span>
+                                </span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingHeaderBlock(blk as HeaderBlock);
+                                  setIsLogoModalOpen(true);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-indigo-500/50 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-white transition text-xs font-semibold shadow-xs"
+                                title="Upload Logo Tenant"
+                              >
+                                <Upload className="w-3.5 h-3.5 text-indigo-400" />
+                                <span>Upload Logo Tenant</span>
+                              </button>
+                            )
                           ) : (
-                            <Menu className="w-5 h-5" />
+                            blk.logoUrl ? (
+                              <img
+                                src={blk.logoUrl}
+                                alt={blk.brandName || 'Logo Tenant'}
+                                className="h-8 max-w-36 object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-linear-to-tr from-indigo-600 to-violet-600 flex items-center justify-center font-black text-white text-xs shadow-md shadow-indigo-600/30 shrink-0">
+                                  {blk.brandName ? blk.brandName.charAt(0).toUpperCase() : 'N'}
+                                </div>
+                                <span className="font-bold text-white text-sm tracking-tight truncate max-w-44">
+                                  {blk.brandName || 'NexaMOS'}
+                                </span>
+                              </div>
+                            )
                           )}
-                        </button>
-                      )}
-                    </div>
+                        </div>
+
+                        {/* KOLOM KANAN: Menu Hamburger Ikon */}
+                        <div className="flex items-center shrink-0">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsMobileMenuOpen(!isMobileMenuOpen);
+                            }}
+                            className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition"
+                            aria-label="Toggle Menu Navigasi"
+                          >
+                            {isMobileMenuOpen ? (
+                              <X className="w-5 h-5" />
+                            ) : (
+                              <Menu className="w-5 h-5" />
+                            )}
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      /* DESKTOP & TABLET: 3 Bagian (Brand/Logo Kiri, Navigasi Tengah, CTA Button Kanan) */
+                      <>
+                        {/* Brand / Logo */}
+                        <div className="flex items-center gap-3">
+                          {!isEditingDisabled ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingHeaderBlock(blk as HeaderBlock);
+                                setIsLogoModalOpen(true);
+                              }}
+                              className="group relative flex items-center justify-center rounded-lg hover:ring-2 hover:ring-indigo-500/50 transition cursor-pointer"
+                              title="Klik untuk upload/ubah logo tenant"
+                            >
+                              {blk.logoUrl ? (
+                                <img
+                                  src={blk.logoUrl}
+                                  alt={blk.brandName}
+                                  className="h-8 max-w-32 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-8 h-8 rounded-lg bg-linear-to-tr from-indigo-600 to-violet-600 flex items-center justify-center font-black text-white text-xs shadow-md shadow-indigo-600/30">
+                                  {blk.brandName ? blk.brandName.charAt(0).toUpperCase() : 'N'}
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-slate-950/70 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                                <Upload className="w-3.5 h-3.5 text-white" />
+                              </div>
+                            </button>
+                          ) : (
+                            blk.logoUrl ? (
+                              <img
+                                src={blk.logoUrl}
+                                alt={blk.brandName}
+                                className="h-8 max-w-32 object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-linear-to-tr from-indigo-600 to-violet-600 flex items-center justify-center font-black text-white text-xs shadow-md shadow-indigo-600/30">
+                                {blk.brandName ? blk.brandName.charAt(0).toUpperCase() : 'N'}
+                              </div>
+                            )
+                          )}
+                          <div className="flex flex-col">
+                            <InlineEditableText
+                              value={blk.brandName || 'Nama Brand'}
+                              onChange={(val) => onUpdateBlock?.({ ...blk, brandName: val })}
+                              disabled={isEditingDisabled} onAuthRequired={inlineAuthCallback}
+                              as="span"
+                              className="font-bold text-white text-sm tracking-tight truncate max-w-44 sm:max-w-xs"
+                            />
+                            {blk.tagline && (
+                              <InlineEditableText
+                                value={blk.tagline}
+                                onChange={(val) => onUpdateBlock?.({ ...blk, tagline: val })}
+                                disabled={isEditingDisabled} onAuthRequired={inlineAuthCallback}
+                                as="span"
+                                className="text-xs text-slate-400 truncate max-w-44 sm:max-w-xs hidden sm:block"
+                              />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Desktop & Tablet Navigation Menu */}
+                        <nav className="flex items-center gap-6 text-xs font-medium text-slate-300">
+                          {(blk.navItems || []).map((nav) => (
+                            <a
+                              key={nav.id}
+                              href={nav.href}
+                              className="hover:text-white transition hover:underline underline-offset-4"
+                              onClick={(e) => {
+                                if (!isLivePreview) {
+                                  e.preventDefault();
+                                }
+                              }}
+                            >
+                              {nav.label}
+                            </a>
+                          ))}
+                        </nav>
+
+                        {/* Right Action: CTA Button on Desktop */}
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`https://wa.me/${blk.ctaWhatsapp}?text=Halo%20Admin%2C%20saya%20ingin%20konsultasi`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-xs ${themeCls.btnPrimary}`}
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <InlineEditableText
+                              value={blk.ctaText}
+                              onChange={(val) => onUpdateBlock?.({ ...blk, ctaText: val })}
+                              disabled={isEditingDisabled} onAuthRequired={inlineAuthCallback}
+                              as="span"
+                            />
+                          </a>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Mobile Dropdown Drawer Menu */}
-                  {isMobile && isMobileMenuOpen && (
+                  {(isMobile || isPublicPage) && isMobileMenuOpen && (
                     <div className="border-t border-slate-800/80 bg-slate-950/98 px-4 py-4 space-y-3">
                       <nav className="flex flex-col space-y-1">
                         {(blk.navItems || []).map((nav) => (
@@ -1311,6 +1419,21 @@ export const CanvasArea: React.FC<CanvasAreaProps> = ({
           </div>
         )}
       </div>
+
+      {/* Pop Up Modal Simpel Upload Logo Tenant dengan Auto-Kompresi */}
+      <TenantLogoModal
+        isOpen={isLogoModalOpen}
+        onClose={() => setIsLogoModalOpen(false)}
+        currentLogoUrl={editingHeaderBlock?.logoUrl}
+        brandName={editingHeaderBlock?.brandName}
+        onSaveLogo={(newUrl) => {
+          if (editingHeaderBlock && onUpdateBlock) {
+            onUpdateBlock({ ...editingHeaderBlock, logoUrl: newUrl });
+            setEditingHeaderBlock({ ...editingHeaderBlock, logoUrl: newUrl });
+          }
+        }}
+        onAuthRequired={inlineAuthCallback}
+      />
     </main>
   );
 };
